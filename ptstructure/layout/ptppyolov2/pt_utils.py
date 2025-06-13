@@ -147,6 +147,7 @@ def matrix_nms(bboxes,
 # yolo_box
 # https://github.com/miemie2013/Pytorch-PPYOLO/blob/master/model/head.py
 def yolo_box(conv_output, anchors, stride, num_classes, scale_x_y, im_size, clip_bbox, conf_thresh, use_gpu=False):
+    device = conv_output.device
     conv_output = conv_output.permute(0, 2, 3, 1)
     conv_shape       = conv_output.shape
     batch_size       = conv_shape[0]
@@ -169,8 +170,7 @@ def yolo_box(conv_output, anchors, stride, num_classes, scale_x_y, im_size, clip
 
     # _anchors = torch.Tensor(anchors, device=conv_raw_dxdy.device)   # RuntimeError: legacy constructor for device type: cpu was passed device type: cuda, but device type must be: cpu
     _anchors = torch.Tensor(anchors)
-    if use_gpu and torch.cuda.is_available():
-        _anchors = _anchors.cuda()
+    _anchors = _anchors.to(device)
     pred_wh = (torch.exp(conv_raw_dwdh) * _anchors)
 
     pred_xyxy = torch.cat([pred_xy - pred_wh / 2, pred_xy + pred_wh / 2], dim=-1)   # 左上角xy + 右下角xy

@@ -11,7 +11,7 @@ import cv2
 import numpy as np
 import time
 import torch
-import tools.infer.pytorchocr_utility as utility
+import pytorchocr.tools.infer.pytorchocr_utility as utility
 from pytorchocr.base_ocr_v20 import BaseOCRV20
 from pytorchocr.data import create_operators, transform
 from pytorchocr.postprocess import build_post_process
@@ -53,8 +53,7 @@ class TableStructurer(BaseOCRV20):
         self.preprocess_op = create_operators(pre_process_list)
         self.postprocess_op = build_post_process(postprocess_params)
 
-        use_gpu = args.use_gpu
-        self.use_gpu = torch.cuda.is_available() and use_gpu
+        self.use_gpu = args.use_gpu
 
         self.weights_path = args.table_model_path
         self.yaml_path = args.table_yaml_path
@@ -64,8 +63,7 @@ class TableStructurer(BaseOCRV20):
 
         self.load_pytorch_weights(self.weights_path)
         self.net.eval()
-        if self.use_gpu:
-            self.net.cuda()
+        self.net.to(self.use_gpu)
 
     def __call__(self, img):
         ori_im = img.copy()
@@ -89,8 +87,7 @@ class TableStructurer(BaseOCRV20):
         print('inp ==> ', np.sum(img), np.mean(img), np.max(img), np.min(img))
         with torch.no_grad():
             inp = torch.from_numpy(img)
-            if self.use_gpu:
-                inp = inp.cuda()
+            inp = inp.to(self.use_gpu)
             outputs = self.net(inp)
         preds = {}
         preds['structure_probs'] = outputs['structure_probs'].cpu().numpy()#outputs[1]

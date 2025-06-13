@@ -11,7 +11,7 @@ import time
 import json
 import torch
 from pytorchocr.base_ocr_v20 import BaseOCRV20
-import tools.infer.pytorchocr_utility as utility
+import pytorchocr.tools.infer.pytorchocr_utility as utility
 from pytorchocr.utils.utility import get_image_file_list, check_and_read
 from pytorchocr.data import create_operators, transform
 from pytorchocr.postprocess import build_post_process
@@ -117,8 +117,7 @@ class TextDetector(BaseOCRV20):
         self.preprocess_op = create_operators(pre_process_list)
         self.postprocess_op = build_post_process(postprocess_params)
 
-        use_gpu = args.use_gpu
-        self.use_gpu = torch.cuda.is_available() and use_gpu
+        self.use_gpu = args.use_gpu
 
         self.weights_path = args.det_model_path
         self.yaml_path = args.det_yaml_path
@@ -126,8 +125,7 @@ class TextDetector(BaseOCRV20):
         super(TextDetector, self).__init__(network_config, **kwargs)
         self.load_pytorch_weights(self.weights_path)
         self.net.eval()
-        if self.use_gpu:
-            self.net.cuda()
+        self.net.to(self.use_gpu)
 
     def order_points_clockwise(self, pts):
         """
@@ -198,8 +196,7 @@ class TextDetector(BaseOCRV20):
 
         with torch.no_grad():
             inp = torch.from_numpy(img)
-            if self.use_gpu:
-                inp = inp.cuda()
+            inp = inp.to(self.use_gpu)
             outputs = self.net(inp)
 
         preds = {}

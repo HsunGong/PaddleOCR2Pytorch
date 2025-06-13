@@ -66,7 +66,7 @@ class SerPredictor(object):
         # print(self.model);exit()
 
         # init ocr_engine
-        from tools.infer.predict_system import TextSystem as OCR
+        from pytorchocr.tools.infer.predict_system import TextSystem as OCR
 
         self.ocr_engine = OCR(args)
 

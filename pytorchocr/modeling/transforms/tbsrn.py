@@ -77,11 +77,9 @@ class FeatureEnhancer(nn.Module):
         global_info: (batch, embedding_size, 1, 1)
         conv_feature: (batch, channel, H, W)
         '''
+        device = next(self.parameters()).device
         batch = conv_feature.shape[0]
-        if torch.cuda.is_available():
-            position2d = positionalencoding2d(64, 16, 64).float().cuda().unsqueeze(0).reshape([1, 64, 1024])
-        else:
-            position2d = positionalencoding2d(64, 16, 64).float().unsqueeze(0).reshape([1, 64, 1024])
+        position2d = positionalencoding2d(64, 16, 64).float().to(device).unsqueeze(0).reshape([1, 64, 1024])
         position2d = position2d.repeat(batch, 1, 1)
         conv_feature = torch.cat([conv_feature, position2d], 1)  # batch, 128(64+64), 32, 128
         result = conv_feature.permute(0, 2, 1).contiguous()

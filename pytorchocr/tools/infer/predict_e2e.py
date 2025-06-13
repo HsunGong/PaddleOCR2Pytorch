@@ -15,7 +15,7 @@ import sys
 
 import torch
 from pytorchocr.base_ocr_v20 import BaseOCRV20
-import tools.infer.pytorchocr_utility as utility
+import pytorchocr.tools.infer.pytorchocr_utility as utility
 from pytorchocr.utils.utility import get_image_file_list, check_and_read_gif
 from pytorchocr.data import create_operators, transform
 from pytorchocr.postprocess import build_post_process
@@ -62,8 +62,7 @@ class TextE2E(BaseOCRV20):
         self.preprocess_op = create_operators(pre_process_list)
         self.postprocess_op = build_post_process(postprocess_params)
 
-        use_gpu = args.use_gpu
-        self.use_gpu = torch.cuda.is_available() and use_gpu
+        self.use_gpu = args.use_gpu
         self.weights_path = args.e2e_model_path
         self.yaml_path = args.e2e_yaml_path
         network_config = utility.AnalysisConfig(self.weights_path, self.yaml_path)
@@ -71,8 +70,7 @@ class TextE2E(BaseOCRV20):
 
         self.load_pytorch_weights(self.weights_path)
         self.net.eval()
-        if self.use_gpu:
-            self.net.cuda()
+        self.net.to(self.use_gpu)
 
     def clip_det_res(self, points, img_height, img_width):
         for pno in range(points.shape[0]):
@@ -104,8 +102,7 @@ class TextE2E(BaseOCRV20):
 
         with torch.no_grad():
             inp = torch.from_numpy(img)
-            if self.use_gpu:
-                inp = inp.cuda()
+            inp = inp.to(self.use_gpu)
             outputs = self.net(inp)
 
         preds = {}

@@ -11,7 +11,7 @@ import math
 import time
 import torch
 from pytorchocr.base_ocr_v20 import BaseOCRV20
-import tools.infer.pytorchocr_utility as utility
+import pytorchocr.tools.infer.pytorchocr_utility as utility
 from pytorchocr.postprocess import build_post_process
 from pytorchocr.utils.utility import get_image_file_list, check_and_read_gif
 
@@ -76,8 +76,7 @@ class TextRecognizer(BaseOCRV20):
             }
         self.postprocess_op = build_post_process(postprocess_params)
 
-        use_gpu = args.use_gpu
-        self.use_gpu = torch.cuda.is_available() and use_gpu
+        self.use_gpu = args.use_gpu
 
         self.limited_max_width = args.limited_max_width
         self.limited_min_width = args.limited_min_width
@@ -100,8 +99,7 @@ class TextRecognizer(BaseOCRV20):
 
         self.load_state_dict(weights)
         self.net.eval()
-        if self.use_gpu:
-            self.net.cuda()
+        self.net.to(self.use_gpu)
 
     def resize_norm_img(self, img, max_wh_ratio):
         imgC, imgH, imgW = self.rec_image_shape
@@ -382,12 +380,11 @@ class TextRecognizer(BaseOCRV20):
                     gsrm_slf_attn_bias1_inp = torch.from_numpy(gsrm_slf_attn_bias1_list)
                     gsrm_slf_attn_bias2_inp = torch.from_numpy(gsrm_slf_attn_bias2_list)
 
-                    if self.use_gpu:
-                        inp = inp.cuda()
-                        encoder_word_pos_inp = encoder_word_pos_inp.cuda()
-                        gsrm_word_pos_inp = gsrm_word_pos_inp.cuda()
-                        gsrm_slf_attn_bias1_inp = gsrm_slf_attn_bias1_inp.cuda()
-                        gsrm_slf_attn_bias2_inp = gsrm_slf_attn_bias2_inp.cuda()
+                    inp = inp.to(self.use_gpu)
+                    encoder_word_pos_inp = encoder_word_pos_inp.to(self.use_gpu)
+                    gsrm_word_pos_inp = gsrm_word_pos_inp.to(self.use_gpu)
+                    gsrm_slf_attn_bias1_inp = gsrm_slf_attn_bias1_inp.to(self.use_gpu)
+                    gsrm_slf_attn_bias2_inp = gsrm_slf_attn_bias2_inp.to(self.use_gpu)
 
                     backbone_out = self.net.backbone(inp) # backbone_feat
                     prob_out = self.net.head(backbone_out, [encoder_word_pos_inp, gsrm_word_pos_inp, gsrm_slf_attn_bias1_inp, gsrm_slf_attn_bias2_inp])
@@ -404,8 +401,7 @@ class TextRecognizer(BaseOCRV20):
 
                 with torch.no_grad():
                     inp = torch.from_numpy(norm_img_batch)
-                    if self.use_gpu:
-                        inp = inp.cuda()
+                    inp = inp.to(self.use_gpu)
                     preds = self.net(inp)
 
             elif self.rec_algorithm == "CAN":
@@ -415,8 +411,7 @@ class TextRecognizer(BaseOCRV20):
                 inputs = [norm_img_batch, norm_img_mask_batch, word_label_list]
 
                 inp = [torch.from_numpy(e_i) for e_i in inputs]
-                if self.use_gpu:
-                    inp = [e_i.cuda() for e_i in inp]
+                inp = [e_i.to(self.use_gpu) for e_i in inp]
                 with torch.no_grad():
                     outputs = self.net(inp)
                     outputs = [v.cpu().numpy() for k, v in enumerate(outputs)]
@@ -428,8 +423,7 @@ class TextRecognizer(BaseOCRV20):
 
                 with torch.no_grad():
                     inp = torch.from_numpy(norm_img_batch)
-                    if self.use_gpu:
-                        inp = inp.cuda()
+                    inp = inp.to(self.use_gpu)
                     prob_out = self.net(inp)
 
                 if isinstance(prob_out, list):

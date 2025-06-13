@@ -12,7 +12,7 @@ import math
 import time
 import torch
 from pytorchocr.base_ocr_v20 import BaseOCRV20
-import tools.infer.pytorchocr_utility as utility
+import pytorchocr.tools.infer.pytorchocr_utility as utility
 from pytorchocr.postprocess import build_post_process
 from pytorchocr.utils.utility import get_image_file_list, check_and_read_gif
 
@@ -28,8 +28,7 @@ class TextClassifier(BaseOCRV20):
         }
         self.postprocess_op = build_post_process(postprocess_params)
 
-        use_gpu = args.use_gpu
-        self.use_gpu = torch.cuda.is_available() and use_gpu
+        self.use_gpu = args.use_gpu
 
         self.weights_path = args.cls_model_path
         self.yaml_path = args.cls_yaml_path
@@ -43,8 +42,7 @@ class TextClassifier(BaseOCRV20):
 
         self.load_pytorch_weights(self.weights_path)
         self.net.eval()
-        if self.use_gpu:
-            self.net.cuda()
+        self.net.to(self.use_gpu)
 
     def resize_norm_img(self, img):
         imgC, imgH, imgW = self.cls_image_shape
@@ -102,8 +100,7 @@ class TextClassifier(BaseOCRV20):
 
             with torch.no_grad():
                 inp = torch.from_numpy(norm_img_batch)
-                if self.use_gpu:
-                    inp = inp.cuda()
+                inp = inp.to(self.use_gpu)
                 prob_out = self.net(inp)
             prob_out = prob_out.cpu().numpy()
 

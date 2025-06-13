@@ -14,7 +14,7 @@ import logging
 
 from pytorchocr.utils.utility import get_image_file_list, check_and_read_gif
 from pytorchocr.utils.logging import get_logger
-from tools.infer.predict_system import TextSystem
+from pytorchocr.tools.infer.predict_system import TextSystem
 # from ptstructure.table.predict_table import TableSystem, to_excel
 from ptstructure.utility import parse_args, draw_structure_result
 

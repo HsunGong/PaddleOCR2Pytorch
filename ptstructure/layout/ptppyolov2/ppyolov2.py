@@ -73,8 +73,7 @@ class PPYOLOv2:
                               )
 
 
-        if self.use_gpu:
-            self.net.cuda()
+        self.net.to(self.use_gpu)
 
     def preprocess(self, image):
         # not keep ratio
@@ -105,8 +104,7 @@ class PPYOLOv2:
             image_data = image_data.transpose([0,3,1,2])
 
         inp = torch.from_numpy(image_data)
-        if self.use_gpu:
-            inp = inp.cuda()
+        inp = inp.to(self.use_gpu)
         with torch.no_grad():
             outputs = self.net(inp)
 

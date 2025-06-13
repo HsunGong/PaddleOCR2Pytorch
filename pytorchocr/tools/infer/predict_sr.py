@@ -28,7 +28,7 @@ import traceback
 import torch
 
 from pytorchocr.base_ocr_v20 import BaseOCRV20
-import tools.infer.pytorchocr_utility as utility
+import pytorchocr.tools.infer.pytorchocr_utility as utility
 from pytorchocr.postprocess import build_post_process
 from pytorchocr.utils.logging import get_logger
 from pytorchocr.utils.utility import get_image_file_list, check_and_read
@@ -41,8 +41,7 @@ class TextSR(BaseOCRV20):
         self.sr_image_shape = [int(v) for v in args.sr_image_shape.split(",")]
         self.sr_batch_num = args.sr_batch_num
 
-        use_gpu = args.use_gpu
-        self.use_gpu = torch.cuda.is_available() and use_gpu
+        self.use_gpu = args.use_gpu
         self.weights_path = args.sr_model_path
         self.yaml_path = args.sr_yaml_path
         network_config = utility.AnalysisConfig(self.weights_path, self.yaml_path)
@@ -53,8 +52,7 @@ class TextSR(BaseOCRV20):
 
         self.load_state_dict(weights)
         self.net.eval()
-        if self.use_gpu:
-            self.net.cuda()
+        self.net.to(self.use_gpu)
 
 
     def resize_norm_img(self, img):
@@ -85,8 +83,7 @@ class TextSR(BaseOCRV20):
 
             with torch.no_grad():
                 inp = torch.from_numpy(norm_img_batch)
-                if self.use_gpu:
-                    inp = inp.cuda()
+                inp = inp.to(self.use_gpu)
                 outputs = self.net(inp)
             outputs = [v.cpu().numpy() for k, v in outputs.items()]
 

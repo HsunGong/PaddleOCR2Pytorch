@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+from typing import Tuple, List, Dict, Any
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(__dir__)
@@ -12,15 +13,15 @@ import numpy as np
 import time
 from PIL import Image
 import json
-import tools.infer.pytorchocr_utility as utility
-import tools.infer.predict_rec as predict_rec
-import tools.infer.predict_det as predict_det
-import tools.infer.predict_cls as predict_cls
+import pytorchocr.tools.infer.pytorchocr_utility as utility
+import pytorchocr.tools.infer.predict_rec as predict_rec
+import pytorchocr.tools.infer.predict_det as predict_det
+import pytorchocr.tools.infer.predict_cls as predict_cls
 from pytorchocr.utils.utility import (
     get_image_file_list,
     check_and_read,
 )
-from tools.infer.pytorchocr_utility import draw_ocr_box_txt
+from pytorchocr.tools.infer.pytorchocr_utility import draw_ocr_box_txt
 
 
 
@@ -49,7 +50,7 @@ class TextSystem(object):
             print("{bno}, {}".format(rec_res[bno]))
         self.crop_image_res_index += bbox_num
 
-    def __call__(self, img, cls=True, slice={}):
+    def __call__(self, img, cls=True, slice={}) -> Tuple[Any, List[Tuple[str, float]], Dict[str, float]]:
         time_dict = {"det": 0, "rec": 0, "cls": 0, "all": 0}
 
         if img is None:
