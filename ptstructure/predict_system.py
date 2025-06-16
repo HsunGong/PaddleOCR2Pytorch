@@ -17,6 +17,7 @@ from pytorchocr.utils.logging import get_logger
 from pytorchocr.tools.infer.predict_system import TextSystem
 # from ptstructure.table.predict_table import TableSystem, to_excel
 from ptstructure.utility import parse_args, draw_structure_result
+from pytorchocr.utils.logging import redirect_to_logger
 
 from ptstructure.layout.ptppyolov2.ppyolov2_layout import PPYOLOv2 as PPYOLOV2DetectionLayoutModel
 
@@ -90,7 +91,7 @@ class OCRSystem(object):
                 if region.type == 'Table':
                     # res = self.table_system(roi_img)
                     res = ([],[])
-                    print('Structure Table is not implemented.')
+                    redirect_to_logger('Structure Table is not implemented.')
                     # raise NotImplementedError
                 else:
                     filter_boxes, filter_rec_res = self.text_system(roi_img)
@@ -142,7 +143,7 @@ def save_structure_res(res, save_folder, img_name):
                                         '{}.jpg'.format(region['bbox']))
                 cv2.imwrite(img_path, roi_img)
             else:
-                print(region['res'])
+                redirect_to_logger(region['res'])
                 for box, rec_res in zip(region['res'][0], region['res'][1]):
                     f.write('{}\t{}\n'.format(
                         np.array(box).reshape(-1).tolist(), rec_res))

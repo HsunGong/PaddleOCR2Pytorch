@@ -21,12 +21,13 @@ num_heads = 8
 num_encoder_TUs = 2
 num_decoder_TUs = 4
 hidden_dims = 512
+from pytorchocr.utils.logging import redirect_to_logger
 
 def paddle_func():
     np.random.seed(SEED)
     # x = np.load('input.npy', allow_pickle=True)
     x = np.random.rand(input_shape[0], input_shape[1], input_shape[2], input_shape[3]).astype(np.float32)
-    print('pp input size: {}'.format(x.shape))
+    redirect_to_logger('pp input size: {}'.format(x.shape))
     # x1 = np.random.rand(1, 256, 1).astype(np.float32)
     x1 = np.load('encoder_word_pos_list.npy', allow_pickle=True)
     # x2 = np.random.rand(1, 25, 1).astype(np.int)
@@ -53,7 +54,7 @@ def paddle_func():
         sd = OrderedDict()
         for key, value in state_dict.items():
             v = value.numpy()
-            # print(key, value.shape, np.sum(v), np.mean(v), np.max(v), np.min(v))
+            # redirect_to_logger(key, value.shape, np.sum(v), np.mean(v), np.max(v), np.min(v))
             sd[key] = v
 
         np.save('srnhead.npy', sd)
@@ -78,7 +79,7 @@ def torch_func():
     np.random.seed(SEED)
     # x = np.load('input.npy', allow_pickle=True)
     x = np.random.rand(input_shape[0], input_shape[1], input_shape[2], input_shape[3]).astype(np.float32)
-    print('pt input size: {}'.format(x.shape))
+    redirect_to_logger('pt input size: {}'.format(x.shape))
     # x1 = np.random.rand(1, 256, 1).astype(np.float32)
     x1 = np.load('encoder_word_pos_list.npy', allow_pickle=True)
     # x2 = np.random.rand(1, 25, 1).astype(np.int)
@@ -149,8 +150,8 @@ def torch_func():
             ppname = name
 
         else:
-            print('Redundance:')
-            print(name)
+            redirect_to_logger('Redundance:')
+            redirect_to_logger(name)
             raise ValueError
 
 
@@ -167,10 +168,10 @@ def torch_func():
             else:
                 layer.state_dict()[key].copy_(torch.Tensor(sd[ppname]))
         except Exception as e:
-            print('except: pt: ', key)
-            print('except: pp: ', ppname)
-            print('except: pt: ', layer.state_dict()[key].shape)
-            print('except: pp: ', sd[ppname].shape)
+            redirect_to_logger('except: pt: ', key)
+            redirect_to_logger('except: pp: ', ppname)
+            redirect_to_logger('except: pt: ', layer.state_dict()[key].shape)
+            redirect_to_logger('except: pp: ', sd[ppname].shape)
             raise e
 
     out = layer(inputs, [x1,x2,x3,x4])
@@ -183,14 +184,14 @@ def torch_func():
     # return alpha.data.numpy()
 
 def print_cmp(inp, name=None):
-    print('{}: shape-{}, sum: {}, mean: {}, max: {}, min: {}'.format(name, inp.shape,
+    redirect_to_logger('{}: shape-{}, sum: {}, mean: {}, max: {}, min: {}'.format(name, inp.shape,
                                                                      np.sum(inp), np.mean(inp),
                                                                      np.max(inp), np.min(inp)))
 
 if __name__ == '__main__':
-    print('==========paddle=================')
+    redirect_to_logger('==========paddle=================')
     predict, pvam_feature, decoded_out, word_out, gsrm_out = paddle_func()
     print_cmp(predict, name='predict')
-    print('===========pytorch================')
+    redirect_to_logger('===========pytorch================')
     predict, pvam_feature, decoded_out, word_out, gsrm_out = torch_func()
     print_cmp(predict, name='predict')

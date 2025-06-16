@@ -20,29 +20,30 @@ MAX_ELEM_LENGTH = 800
 IN_MAX_LEN = 488
 NAME = 'table_att_head'
 tmp_save_name = '{}.npy'.format(NAME)
+from pytorchocr.utils.logging import redirect_to_logger
 
 def print_cmp(inp, name=None):
-    print('{}: shape-{}, sum: {}, mean: {}, max: {}, min: {}'.format(name, inp.shape,
+    redirect_to_logger('{}: shape-{}, sum: {}, mean: {}, max: {}, min: {}'.format(name, inp.shape,
                                                                      np.sum(inp), np.mean(inp),
                                                                      np.max(inp), np.min(inp)))
 def compare_ret(pp_ret, pt_ret, info):
-    print('============ {} ============='.format(info))
-    print('pp: ', np.sum(pp_ret), np.mean(pp_ret), np.max(pp_ret), np.min(pp_ret))
-    print('ms: ', np.sum(pt_ret), np.mean(pt_ret), np.max(pt_ret), np.min(pt_ret))
-    print('sub: ', np.sum(np.abs(pp_ret-pt_ret)), np.mean(np.abs(pp_ret-pt_ret)))
+    redirect_to_logger('============ {} ============='.format(info))
+    redirect_to_logger('pp: ', np.sum(pp_ret), np.mean(pp_ret), np.max(pp_ret), np.min(pp_ret))
+    redirect_to_logger('ms: ', np.sum(pt_ret), np.mean(pt_ret), np.max(pt_ret), np.min(pt_ret))
+    redirect_to_logger('sub: ', np.sum(np.abs(pp_ret-pt_ret)), np.mean(np.abs(pp_ret-pt_ret)))
 
 def clean(filename):
     filename = os.path.abspath(os.path.expanduser(filename))
     if os.path.exists(filename):
         os.remove(filename)
-        print('remove: {}'.format(filename))
+        redirect_to_logger('remove: {}'.format(filename))
 
 def get_pp_static_dict(input_dict):
     sd = OrderedDict()
     for key, value in input_dict.items():
         v = value.numpy()
         sd[key] = v
-        print('pp: {} ---- {}'.format(key, v.shape))
+        redirect_to_logger('pp: {} ---- {}'.format(key, v.shape))
 
     return sd
 def get_np_static_dict(npy_path):
@@ -82,7 +83,7 @@ def paddle_func():
     for k, v in sd_.items():
         if k.startswith('head.'):
             sd[k] = v.copy()
-            print('==> ',k)
+            redirect_to_logger('==> ',k)
 
     with fluid.dygraph.guard():
         layer = PPNet()
@@ -153,7 +154,7 @@ def torch_func():
     sd = get_np_static_dict(tmp_save_name)
 
     for key, value in layer.state_dict().items():
-        print('pytorch: {} ---- {}'.format(key, value.shape))
+        redirect_to_logger('pytorch: {} ---- {}'.format(key, value.shape))
 
     for k, v in layer.state_dict().items():
 
@@ -184,9 +185,9 @@ def torch_func():
             else:
                 layer.state_dict()[k].copy_(torch.Tensor(sd[ppname]))
         except Exception as e:
-            print('pytorch: {}, {}'.format(k, v.size()))
-            print('paddle: {}'.format(ppname))
-            print('paddle: {}'.format(sd[ppname].shape))
+            redirect_to_logger('pytorch: {}, {}'.format(k, v.size()))
+            redirect_to_logger('paddle: {}'.format(ppname))
+            redirect_to_logger('paddle: {}'.format(sd[ppname].shape))
             raise e
 
     layer.eval()
@@ -200,8 +201,8 @@ def torch_func():
 if __name__ == '__main__':
     clean(tmp_save_name)
     pp = paddle_func()
-    print('==========++++=================')
+    redirect_to_logger('==========++++=================')
     pt = torch_func()
     [compare_ret(e_pp, e_pt, NAME) for e_pp, e_pt in zip(pp, pt)]
     clean(tmp_save_name)
-    print('done.')
+    redirect_to_logger('done.')

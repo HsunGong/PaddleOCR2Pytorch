@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from pytorchocr.modeling.backbones.det_mobilenet_v3 import SEModule
 from pytorchocr.modeling.necks.intracl import IntraCLBlock
+from pytorchocr.utils.logging import redirect_to_logger
 
 def hard_swish(x, inplace=True):
     return x * F.relu6(x + 3., inplace=inplace) / 6.
@@ -72,7 +73,7 @@ class DSConv(nn.Module):
             elif self.act == "hardswish":
                 x = hard_swish(x)
             else:
-                print("The activation function({}) is selected incorrectly.".
+                redirect_to_logger("The activation function({}) is selected incorrectly.".
                       format(self.act))
                 exit()
 

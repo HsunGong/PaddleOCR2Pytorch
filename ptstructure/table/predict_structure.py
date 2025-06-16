@@ -18,6 +18,7 @@ from pytorchocr.postprocess import build_post_process
 from pytorchocr.utils.logging import get_logger
 from pytorchocr.utils.utility import get_image_file_list, check_and_read_gif
 from ptstructure.utility import parse_args
+from pytorchocr.utils.logging import redirect_to_logger
 
 logger = get_logger()
 
@@ -84,7 +85,7 @@ class TableStructurer(BaseOCRV20):
         #     outputs.append(output)
         del img
         img = np.load('inp.npy')
-        print('inp ==> ', np.sum(img), np.mean(img), np.max(img), np.min(img))
+        redirect_to_logger('inp ==> ', np.sum(img), np.mean(img), np.max(img), np.min(img))
         with torch.no_grad():
             inp = torch.from_numpy(img)
             inp = inp.to(self.use_gpu)
@@ -93,9 +94,9 @@ class TableStructurer(BaseOCRV20):
         preds['structure_probs'] = outputs['structure_probs'].cpu().numpy()#outputs[1]
         preds['loc_preds'] = outputs['loc_preds'].cpu().numpy()#outputs[0]
         aa = preds['structure_probs']
-        print('==> ', np.sum(aa), np.mean(aa), np.max(aa), np.min(aa))
+        redirect_to_logger('==> ', np.sum(aa), np.mean(aa), np.max(aa), np.min(aa))
         aa = preds['loc_preds']
-        print('==> ', np.sum(aa), np.mean(aa), np.max(aa), np.min(aa));
+        redirect_to_logger('==> ', np.sum(aa), np.mean(aa), np.max(aa), np.min(aa));
 
         post_result = self.postprocess_op(preds)
 

@@ -41,14 +41,14 @@ def paddle_lstm():
         sd = OrderedDict()
         for key, value in state_dict.items():
             v = value.numpy()
-            print(key, value.shape, np.sum(v), np.mean(v), np.max(v), np.min(v))
+            redirect_to_logger(key, value.shape, np.sum(v), np.mean(v), np.max(v), np.min(v))
             sd[key] = v
 
         np.save('lstm.npy', sd)
 
         inp = fluid.dygraph.to_variable(x)
         ret, _ = lstm(inp)
-        print(len(ret))
+        redirect_to_logger(len(ret))
     return ret.numpy()
 
 
@@ -84,18 +84,18 @@ def torch_lstm_m():
 
     lstm = EncoderWithRNN(10, 3)
     for key, value in lstm.state_dict().items():
-        print(key, value.shape)
+        redirect_to_logger(key, value.shape)
 
 
 
 if __name__ == '__main__':
-    print('==========paddle=================')
+    redirect_to_logger('==========paddle=================')
     a = paddle_lstm()
-    print(a.shape)
-    print('a: ', np.sum(a), np.mean(a), np.max(a), np.min(a))
-    print('===========pytorch================')
+    redirect_to_logger(a.shape)
+    redirect_to_logger('a: ', np.sum(a), np.mean(a), np.max(a), np.min(a))
+    redirect_to_logger('===========pytorch================')
     b = torch_lstm()
-    print(b.shape)
-    print('b: ', np.sum(b), np.mean(b), np.max(b), np.min(b))
-    # print('===========pytorch_m================')
+    redirect_to_logger(b.shape)
+    redirect_to_logger('b: ', np.sum(b), np.mean(b), np.max(b), np.min(b))
+    # redirect_to_logger('===========pytorch_m================')
     # torch_lstm_m()

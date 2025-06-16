@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 import torch
 from pytorchocr.base_ocr_v20 import BaseOCRV20
+from pytorchocr.utils.logging import redirect_to_logger
 
 class ServerV20DetConverter(BaseOCRV20):
     def __init__(self, config, paddle_pretrained_model_path, **kwargs):
@@ -39,8 +40,8 @@ class ServerV20DetConverter(BaseOCRV20):
             elif name.endswith('bias') or name.endswith('weight'):
                 ppname = name
             else:
-                print('Redundance:')
-                print(name)
+                redirect_to_logger('Redundance:')
+                redirect_to_logger(name)
                 raise ValueError
 
 
@@ -63,7 +64,7 @@ if __name__ == '__main__':
     kwargs = {}
     paddle_pretrained_model_path = os.path.join(os.path.abspath(args.src_model_path), 'best_accuracy')
     converter = ServerV20DetConverter(cfg, paddle_pretrained_model_path, **kwargs)
-    print('todo')
+    redirect_to_logger('todo')
 
     # image = cv2.imread('6.jpg')
     # image = cv2.resize(image, (320, 448))
@@ -77,8 +78,8 @@ if __name__ == '__main__':
 
     # out = converter.net(inp)
     # out = out['maps'].data.numpy()
-    # print('out:', np.sum(out), np.mean(out), np.max(out), np.min(out))
+    # redirect_to_logger('out:', np.sum(out), np.mean(out), np.max(out), np.min(out))
 
     # save
     converter.save_pytorch_weights('ch_ptocr_server_v2.0_det_infer.pth')
-    print('done.')
+    redirect_to_logger('done.')

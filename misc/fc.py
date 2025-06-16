@@ -30,7 +30,7 @@ def paddle_fc():
         np.save('fc_w.npy', list(simple_conv.state_dict().values())[0].numpy())
         np.save('fc_b.npy', list(simple_conv.state_dict().values())[1].numpy())
 
-        print(ret)
+        redirect_to_logger(ret)
     return ret.numpy()
 
 def torch_fc():
@@ -44,7 +44,7 @@ def torch_fc():
     tfc.state_dict()['bias'].copy_(torch.Tensor(fc_b))
 
     tres = tfc(org)
-    print(tres)
+    redirect_to_logger(tres)
 
 
 

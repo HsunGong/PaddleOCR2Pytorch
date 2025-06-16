@@ -23,6 +23,7 @@ import math
 import numpy as np
 from dataclasses import dataclass
 from typing import Optional, Tuple, Union
+from pytorchocr.utils.logging import redirect_to_logger
 
 import torch
 import torch.nn as nn
@@ -106,7 +107,7 @@ class DonutSwinConfig(object):
             try:
                 setattr(self, key, value)
             except AttributeError as err:
-                print(f"Can't set {key} with value {value} for {self}")
+                redirect_to_logger(f"Can't set {key} with value {value} for {self}")
                 raise err
 
 

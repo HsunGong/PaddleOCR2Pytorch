@@ -18,14 +18,14 @@ PADDING = 0
 
 
 def print_cmp(inp, name=None):
-    print('{}: shape-{}, sum: {}, mean: {}, max: {}, min: {}'.format(name, inp.shape,
+    redirect_to_logger('{}: shape-{}, sum: {}, mean: {}, max: {}, min: {}'.format(name, inp.shape,
                                                                      np.sum(inp), np.mean(inp),
                                                                      np.max(inp), np.min(inp)))
 def compare_ret(pp_ret, pt_ret, info):
-    print('============ {} ============='.format(info))
-    print('pp: ', np.sum(pp_ret), np.mean(pp_ret), np.max(pp_ret), np.min(pp_ret))
-    print('ms: ', np.sum(pt_ret), np.mean(pt_ret), np.max(pt_ret), np.min(pt_ret))
-    print('sub: ', np.sum(np.abs(pp_ret-pt_ret)), np.mean(np.abs(pp_ret-pt_ret)))
+    redirect_to_logger('============ {} ============='.format(info))
+    redirect_to_logger('pp: ', np.sum(pp_ret), np.mean(pp_ret), np.max(pp_ret), np.min(pp_ret))
+    redirect_to_logger('ms: ', np.sum(pt_ret), np.mean(pt_ret), np.max(pt_ret), np.min(pt_ret))
+    redirect_to_logger('sub: ', np.sum(np.abs(pp_ret-pt_ret)), np.mean(np.abs(pp_ret-pt_ret)))
 
 
 class Hsigmoid(torch.nn.Module):
@@ -56,7 +56,7 @@ def paddle_hs():
         ret = F.hardsigmoid(inp, slope=0.2, offset=0.5)
         # ret = F.hardsigmoid(inp)
 
-        # print(ret)
+        # redirect_to_logger(ret)
     return ret.numpy()
 
 def torch_hs():

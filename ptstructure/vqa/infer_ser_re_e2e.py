@@ -19,6 +19,7 @@ from pytorchnlp.transformers import LayoutXLMModel, LayoutXLMTokenizer, LayoutXL
 # relative reference
 from vqa_utils import parse_args, get_image_file_list, draw_re_results
 from infer_ser_e2e import SerPredictor
+from pytorchocr.utils.logging import redirect_to_logger
 
 def make_input(ser_input, ser_result, max_seq_len=512):
     entities_labels = {'HEADER': 0, 'QUESTION': 1, 'ANSWER': 2}
@@ -113,7 +114,7 @@ if __name__ == "__main__":
             save_img_path = os.path.join(
                 args.output_dir,
                 os.path.splitext(os.path.basename(img_path))[0] + "_re.jpg")
-            print("process: [{}/{}], save result to {}".format(
+            redirect_to_logger("process: [{}/{}], save result to {}".format(
                 idx, len(infer_imgs), save_img_path))
 
             img = cv2.imread(img_path)
@@ -127,4 +128,4 @@ if __name__ == "__main__":
             img_res = draw_re_results(img, result)
             cv2.imwrite(save_img_path, img_res)
 
-    print('all done.')
+    redirect_to_logger('all done.')

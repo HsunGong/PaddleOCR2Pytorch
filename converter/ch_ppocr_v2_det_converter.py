@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 import torch
 from pytorchocr.base_ocr_v20 import BaseOCRV20
+from pytorchocr.utils.logging import redirect_to_logger
 
 
 class PPOCRv2DetConverter(BaseOCRV20):
@@ -14,13 +15,13 @@ class PPOCRv2DetConverter(BaseOCRV20):
         self.net.eval()
 
     def load_paddle_weights(self, weights_path):
-        print('paddle weights loading...')
+        redirect_to_logger('paddle weights loading...')
         import paddle.fluid as fluid
         with fluid.dygraph.guard():
             para_state_dict, opti_state_dict = fluid.load_dygraph(weights_path)
 
-        [print('paddle: {} ---- {}'.format(k, v.shape)) for k, v in para_state_dict.items()]
-        [print('pytorch: {} ---- {}'.format(k, v.shape)) for k, v in self.net.state_dict().items()]
+        [redirect_to_logger('paddle: {} ---- {}'.format(k, v.shape)) for k, v in para_state_dict.items()]
+        [redirect_to_logger('pytorch: {} ---- {}'.format(k, v.shape)) for k, v in self.net.state_dict().items()]
 
         for k,v in self.net.state_dict().items():
 
@@ -43,17 +44,17 @@ class PPOCRv2DetConverter(BaseOCRV20):
                 ppname = ppname.replace('head.', 'student_model.head.')
 
             else:
-                print('Redundance:')
-                print(k)
+                redirect_to_logger('Redundance:')
+                redirect_to_logger(k)
                 raise ValueError
 
             try:
                 self.net.state_dict()[k].copy_(torch.Tensor(para_state_dict[ppname]))
             except Exception as e:
-                print('pytorch: {}, {}'.format(k, v.size()))
-                print('paddle: {}, {}'.format(ppname, para_state_dict[ppname].shape))
+                redirect_to_logger('pytorch: {}, {}'.format(k, v.size()))
+                redirect_to_logger('paddle: {}, {}'.format(ppname, para_state_dict[ppname].shape))
                 raise e
-        print('model is loaded: {}'.format(weights_path))
+        redirect_to_logger('model is loaded: {}'.format(weights_path))
 
 
 if __name__ == '__main__':
@@ -72,7 +73,7 @@ if __name__ == '__main__':
     paddle_pretrained_model_path = os.path.join(os.path.abspath(args.src_model_path), 'best_accuracy')
     converter = PPOCRv2DetConverter(cfg, paddle_pretrained_model_path)
 
-    print('todo')
+    redirect_to_logger('todo')
 
     np.random.seed(666)
     inputs = np.random.randn(1, 3, 640, 640).astype(np.float32)
@@ -80,9 +81,9 @@ if __name__ == '__main__':
 
     out = converter.net(inp)
     out = out['maps'].data.numpy()
-    print('out:', np.sum(out), np.mean(out), np.max(out), np.min(out))
+    redirect_to_logger('out:', np.sum(out), np.mean(out), np.max(out), np.min(out))
 
     # save
     converter.save_pytorch_weights('ch_ptocr_v2_det_infer.pth')
 
-    print('done.')
+    redirect_to_logger('done.')

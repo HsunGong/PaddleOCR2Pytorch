@@ -14,6 +14,7 @@ from PIL import Image
 import torch
 from pytorchnlp.transformers import LayoutXLMTokenizer, LayoutXLMModel, LayoutXLMForTokenClassification
 from pytorchnlp.transformers import LayoutLMTokenizer, LayoutLMModel, LayoutLMForTokenClassification
+from pytorchocr.utils.logging import redirect_to_logger
 
 # relative reference
 from vqa_utils import parse_args, get_image_file_list, draw_ser_results, get_bio_label_maps
@@ -63,7 +64,7 @@ class SerPredictor(object):
         self.tokenizer = tokenizer_class.from_pretrained(args.model_name_or_path)
         self.model = model_class.from_pretrained(args.model_name_or_path)
         self.model.eval()
-        # print(self.model);exit()
+        # redirect_to_logger(self.model);exit()
 
         # init ocr_engine
         from pytorchocr.tools.infer.predict_system import TextSystem as OCR
@@ -137,7 +138,7 @@ if __name__ == "__main__":
             save_img_path = os.path.join(
                 args.output_dir,
                 os.path.splitext(os.path.basename(img_path))[0] + "_ser.jpg")
-            print("process: [{}/{}], save result to {}".format(
+            redirect_to_logger("process: [{}/{}], save result to {}".format(
                 idx, len(infer_imgs), save_img_path))
 
             img = cv2.imread(img_path)
@@ -151,6 +152,6 @@ if __name__ == "__main__":
             img_res = draw_ser_results(img, result)
             cv2.imwrite(save_img_path, img_res)
 
-    print('all done.')
+    redirect_to_logger('all done.')
 
 

@@ -15,6 +15,7 @@ import pytorchocr.tools.infer.pytorchocr_utility as utility
 from pytorchocr.utils.utility import get_image_file_list, check_and_read
 from pytorchocr.data import create_operators, transform
 from pytorchocr.postprocess import build_post_process
+from pytorchocr.utils.logging import redirect_to_logger
 
 
 
@@ -111,7 +112,7 @@ class TextDetector(BaseOCRV20):
             postprocess_params["fourier_degree"] = args.fourier_degree
             postprocess_params["box_type"] = args.det_fce_box_type
         else:
-            print("unknown det_algorithm:{}".format(self.det_algorithm))
+            redirect_to_logger("unknown det_algorithm:{}".format(self.det_algorithm))
             sys.exit(0)
 
         self.preprocess_op = create_operators(pre_process_list)
@@ -353,7 +354,7 @@ if __name__ == "__main__":
             img = cv2.imread(image_file)
         if not flag_pdf:
             if img is None:
-                print("error in loading image:{}".format(image_file))
+                redirect_to_logger("error in loading image:{}".format(image_file))
                 continue
             imgs = [img]
         else:
@@ -385,15 +386,15 @@ if __name__ == "__main__":
                         + "\n"
                 )
             save_results.append(save_pred)
-            print(save_pred)
+            redirect_to_logger(save_pred)
             if len(imgs) > 1:
-                print(
+                redirect_to_logger(
                     "{}_{} The predict time of {}: {}".format(
                         idx, index, image_file, elapse
                     )
                 )
             else:
-                print(
+                redirect_to_logger(
                     "{} The predict time of {}: {}".format(idx, image_file, elapse)
                 )
 
@@ -409,7 +410,7 @@ if __name__ == "__main__":
                 draw_img_save_dir, "det_res_{}".format(os.path.basename(save_file))
             )
             cv2.imwrite(img_path, src_im)
-            print("The visualized image saved in {}".format(img_path))
+            redirect_to_logger("The visualized image saved in {}".format(img_path))
 
     with open(os.path.join(draw_img_save_dir, "det_results.txt"), "w") as f:
         f.writelines(save_results)

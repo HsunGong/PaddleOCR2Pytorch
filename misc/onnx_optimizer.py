@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 
 import onnx
+from pytorchocr.utils.logging import redirect_to_logger
 
 def onnx_optim(onnxfile, save_onnxfile):
     onnx_path = os.path.abspath(os.path.expanduser(onnxfile))
@@ -14,7 +15,7 @@ def onnx_optim(onnxfile, save_onnxfile):
         raise FileNotFoundError('{} is not existed.'.format(onnx))
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
-        print('makedir: {}'.format(save_dir))
+        redirect_to_logger('makedir: {}'.format(save_dir))
     onnx_model = onnx.load(onnxfile)
     passes = ["extract_constant_to_initializer", "eliminate_unused_initializer"]
     # from onnx import optimizer # too old
@@ -30,7 +31,7 @@ def onnx_optim(onnxfile, save_onnxfile):
     optimized_model.graph.output[0].type.tensor_type.shape.dim[3].dim_param = '?'
 
     onnx.save(optimized_model, save_onnxpath)
-    print('{} is saved.'.format(save_onnxpath))
+    redirect_to_logger('{} is saved.'.format(save_onnxpath))
 
 
 if __name__ == '__main__':
@@ -45,4 +46,4 @@ if __name__ == '__main__':
     dst_model_path = args.dst_model_path
     onnx_optim(src_model_path, dst_model_path)
 
-    print('done!')
+    redirect_to_logger('done!')

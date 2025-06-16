@@ -6,18 +6,19 @@ import numpy as np
 import cv2
 import torch
 from pytorchocr.base_ocr_v20 import BaseOCRV20
+from pytorchocr.utils.logging import redirect_to_logger
 
 class PPOCRv4RecConverter(BaseOCRV20):
     def __init__(self, config, paddle_pretrained_model_path, **kwargs):
         para_state_dict, opti_state_dict = self.read_paddle_weights(paddle_pretrained_model_path)
         para_state_dict = self.del_invalid_state_dict(para_state_dict)
         out_channels = list(para_state_dict.values())[-1].shape[0]
-        print('out_channels: ', out_channels)
-        print(type(kwargs), kwargs)
+        redirect_to_logger('out_channels: ', out_channels)
+        redirect_to_logger(type(kwargs), kwargs)
         kwargs['out_channels'] = out_channels
         super(PPOCRv4RecConverter, self).__init__(config, **kwargs)
         self.load_paddle_weights([para_state_dict, opti_state_dict])
-        print('model is loaded: {}'.format(paddle_pretrained_model_path))
+        redirect_to_logger('model is loaded: {}'.format(paddle_pretrained_model_path))
         self.net.eval()
 
 
@@ -52,12 +53,12 @@ class PPOCRv4RecConverter(BaseOCRV20):
                     self.net.state_dict()[ptname].copy_(torch.Tensor(v))
 
             except Exception as e:
-                print('exception:')
-                print('pytorch: {}, {}'.format(ptname, self.net.state_dict()[v].size()))
-                print('paddle: {}, {}'.format(k, v.shape))
+                redirect_to_logger('exception:')
+                redirect_to_logger('pytorch: {}, {}'.format(ptname, self.net.state_dict()[v].size()))
+                redirect_to_logger('paddle: {}, {}'.format(k, v.shape))
                 raise e
 
-        print('model is loaded.')
+        redirect_to_logger('model is loaded.')
 
 def read_network_config_from_yaml(yaml_path):
     if not os.path.exists(yaml_path):
@@ -117,9 +118,9 @@ if __name__ == '__main__':
 
     out = converter.net(inp)
     out = out.data.numpy()
-    print('out:', np.sum(out), np.mean(out), np.max(out), np.min(out))
+    redirect_to_logger('out:', np.sum(out), np.mean(out), np.max(out), np.min(out))
 
     # save
     save_name = 'ch_ptocr_v4_rec_server_infer.pth'
     converter.save_pytorch_weights(save_name)
-    print('done.')
+    redirect_to_logger('done.')

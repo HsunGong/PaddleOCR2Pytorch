@@ -11,30 +11,31 @@ INPUT_SIZE = (1, 3, 640, 640)
 NAME = 'tabel_det'
 tmp_save_name = '{}.npy'.format(NAME)
 weights_path = 'PaddleOCR/ppstructure_models/OCR_and_Table/en_ppocr_mobile_v2.0_table_det_train/best_accuracy'
+from pytorchocr.utils.logging import redirect_to_logger
 
 def print_cmp(inp, name=None):
-    print('{}: shape-{}, sum: {}, mean: {}, max: {}, min: {}'.format(name, inp.shape,
+    redirect_to_logger('{}: shape-{}, sum: {}, mean: {}, max: {}, min: {}'.format(name, inp.shape,
                                                                      np.sum(inp), np.mean(inp),
                                                                      np.max(inp), np.min(inp)))
 def compare_ret(pp_ret, pt_ret, info):
-    print('============ {} ============='.format(info))
-    print('shape:', pp_ret.shape)
-    print('pp: ', np.sum(pp_ret), np.mean(pp_ret), np.max(pp_ret), np.min(pp_ret))
-    print('ms: ', np.sum(pt_ret), np.mean(pt_ret), np.max(pt_ret), np.min(pt_ret))
-    print('sub: ', np.sum(np.abs(pp_ret-pt_ret)), np.mean(np.abs(pp_ret-pt_ret)))
+    redirect_to_logger('============ {} ============='.format(info))
+    redirect_to_logger('shape:', pp_ret.shape)
+    redirect_to_logger('pp: ', np.sum(pp_ret), np.mean(pp_ret), np.max(pp_ret), np.min(pp_ret))
+    redirect_to_logger('ms: ', np.sum(pt_ret), np.mean(pt_ret), np.max(pt_ret), np.min(pt_ret))
+    redirect_to_logger('sub: ', np.sum(np.abs(pp_ret-pt_ret)), np.mean(np.abs(pp_ret-pt_ret)))
 
 def clean(filename):
     filename = os.path.abspath(os.path.expanduser(filename))
     if os.path.exists(filename):
         os.remove(filename)
-        print('remove: {}'.format(filename))
+        redirect_to_logger('remove: {}'.format(filename))
 
 def get_pp_static_dict(input_dict):
     sd = OrderedDict()
     for key, value in input_dict.items():
         v = value.numpy()
         sd[key] = v
-        print('pp: {} ---- {}'.format(key, v.shape))
+        redirect_to_logger('pp: {} ---- {}'.format(key, v.shape))
     return sd
 def get_np_static_dict(npy_path):
     sd = np.load(npy_path, allow_pickle=True)
@@ -105,13 +106,13 @@ class PTStructureTableDetConverter(BaseOCRV20):
         self.net.eval()
 
     def load_paddle_weights(self, weights_path):
-        print('paddle weights loading...')
+        redirect_to_logger('paddle weights loading...')
         import paddle.fluid as fluid
         with fluid.dygraph.guard():
             para_state_dict, opti_state_dict = fluid.load_dygraph(weights_path)
 
-        [print('paddle: {} ---- {}'.format(k, v.shape)) for k, v in para_state_dict.items()]
-        [print('pytorch: {} ---- {}'.format(k, v.shape)) for k, v in self.net.state_dict().items()]
+        [redirect_to_logger('paddle: {} ---- {}'.format(k, v.shape)) for k, v in para_state_dict.items()]
+        [redirect_to_logger('pytorch: {} ---- {}'.format(k, v.shape)) for k, v in self.net.state_dict().items()]
 
         for k,v in self.net.state_dict().items():
             keyword = 'stages.'
@@ -131,12 +132,12 @@ class PTStructureTableDetConverter(BaseOCRV20):
             elif name.endswith('bias') or name.endswith('weight'):
                 ppname = name
             else:
-                print('Redundance:')
-                print(name)
+                redirect_to_logger('Redundance:')
+                redirect_to_logger(name)
                 raise ValueError
 
             self.net.state_dict()[k].copy_(torch.Tensor(para_state_dict[ppname]))
-        print('model is loaded: {}'.format(weights_path))
+        redirect_to_logger('model is loaded: {}'.format(weights_path))
 
 def torch_func():
     cfg = {'model_type': 'det',
@@ -166,9 +167,9 @@ def torch_func():
 if __name__ == '__main__':
     clean(tmp_save_name)
     pp = paddle_func()
-    print('==========++++=================')
+    redirect_to_logger('==========++++=================')
     pt = torch_func()
     [compare_ret(e_pp, e_pt, NAME) for e_pp, e_pt in zip(pp, pt)]
     clean(tmp_save_name)
-    print('done.')
+    redirect_to_logger('done.')
 

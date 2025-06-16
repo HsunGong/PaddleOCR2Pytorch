@@ -18,6 +18,7 @@ import json
 import numpy as np
 import os
 import warnings
+from pytorchocr.utils.logging import redirect_to_logger
 
 
 class Vocab(object):
@@ -198,7 +199,7 @@ class Vocab(object):
                     unk_token='[UNK]',
                     pad_token='[PAD]')
                 tokens = vocab.to_tokens([0, 1, 2, 3])
-                print(tokens)
+                redirect_to_logger(tokens)
                 # ['[PAD]', '[UNK]', '一斤三', '意面屋']
         """
         to_reduce = False
@@ -256,7 +257,7 @@ class Vocab(object):
                     unk_token='[UNK]',
                     pad_token='[PAD]')
                 tokens = vocab.to_indices(['[PAD]', '[UNK]', '一斤三', '意面屋'])
-                print(tokens)
+                redirect_to_logger(tokens)
                 # [0, 1, 2, 3]
         """
         return self[tokens]
@@ -360,7 +361,7 @@ class Vocab(object):
 
                 vocab1 = Vocab.from_json(json_str)
                 vocab2 = Vocab.from_json('./vocab.json')
-                print(len(vocab), len(vocab1), len(vocab2))
+                redirect_to_logger(len(vocab), len(vocab1), len(vocab2))
                 # 1256608 1256608 1256608
         """
         if os.path.isfile(json_str):
@@ -424,7 +425,7 @@ class Vocab(object):
                     pad_token='[PAD]')
 
                 vocab1 = Vocab.from_dict(vocab.token_to_idx)
-                print(len(vocab), len(vocab.token_to_idx), len(vocab1))
+                redirect_to_logger(len(vocab), len(vocab.token_to_idx), len(vocab1))
                 # 1256608 1256608 1256608
         """
         vocab = cls(counter=None,
@@ -493,7 +494,7 @@ class Vocab(object):
                     pad_token='[PAD]')
 
                 vocab1 = Vocab.build_vocab([list(vocab.token_to_idx.keys())])
-                print(len(vocab), len(vocab1))
+                redirect_to_logger(len(vocab), len(vocab1))
                 # 1256608 1256608
         """
         counter = collections.Counter()
@@ -553,7 +554,7 @@ class Vocab(object):
                     vocab_file_path,
                     unk_token='[UNK]',
                     pad_token='[PAD]')
-                print(len(vocab))
+                redirect_to_logger(len(vocab))
                 # 1256608
         """
         token_to_idx = {}

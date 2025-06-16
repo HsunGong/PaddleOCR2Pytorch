@@ -33,6 +33,7 @@ import torch.nn.functional as F
 from typing import Tuple, List, Dict, Union, Callable, Any
 #from ppocr.modeling.backbones.rec_donut_swin import DonutSwinModelOutput
 from pytorchocr.modeling.backbones.rec_donut_swin import DonutSwinModelOutput
+from pytorchocr.utils.logging import redirect_to_logger
 
 
 class IdentityBasedConv1x1(nn.Conv2d):
@@ -595,7 +596,7 @@ class TheseusLayer(nn.Module):
 
             net = paddleclas.MobileNetV1()
             res = net.upgrade_sublayer(layer_name_pattern=["blocks[11].depthwise_conv.conv", "blocks[12].depthwise_conv.conv"], handle_func=rep_func)
-            print(res)
+            redirect_to_logger(res)
             # {'blocks[11].depthwise_conv.conv': the corresponding new_layer, 'blocks[12].depthwise_conv.conv': the corresponding new_layer}
         """
 

@@ -6,23 +6,24 @@ import numpy as np
 import cv2
 import torch
 from pytorchocr.base_ocr_v20 import BaseOCRV20
+from pytorchocr.utils.logging import redirect_to_logger
 
 class MultilingualV20RecConverter(BaseOCRV20):
     def __init__(self, config, paddle_pretrained_model_path, **kwargs):
         para_state_dict, opti_state_dict = self.read_paddle_weights(paddle_pretrained_model_path)
         out_channels = list(para_state_dict.values())[-1].shape[0]
-        print('out_channels: ', out_channels)
-        print(type(kwargs), kwargs)
+        redirect_to_logger('out_channels: ', out_channels)
+        redirect_to_logger(type(kwargs), kwargs)
         kwargs['out_channels'] = out_channels
         super(MultilingualV20RecConverter, self).__init__(config, **kwargs)
         self.load_paddle_weights([para_state_dict, opti_state_dict])
-        print('model is loaded: {}'.format(paddle_pretrained_model_path))
+        redirect_to_logger('model is loaded: {}'.format(paddle_pretrained_model_path))
         self.net.eval()
 
 
     def load_paddle_weights(self, paddle_weights):
         para_state_dict, opti_state_dict = paddle_weights
-        print(list(para_state_dict.values())[-1].shape)
+        redirect_to_logger(list(para_state_dict.values())[-1].shape)
         for k,v in self.net.state_dict().items():
             keyword = 'block_list.'
             if keyword in k:
@@ -44,8 +45,8 @@ class MultilingualV20RecConverter(BaseOCRV20):
                 ppname = name
 
             else:
-                print('Redundance:')
-                print(name)
+                redirect_to_logger('Redundance:')
+                redirect_to_logger(name)
                 raise ValueError
 
             try:
@@ -54,8 +55,8 @@ class MultilingualV20RecConverter(BaseOCRV20):
                 else:
                     self.net.state_dict()[k].copy_(torch.Tensor(para_state_dict[ppname]))
             except Exception as e:
-                print('pytorch: {}, {}'.format(k, v.size()))
-                print('paddle: {}, {}'.format(ppname, para_state_dict[ppname].shape))
+                redirect_to_logger('pytorch: {}, {}'.format(k, v.size()))
+                redirect_to_logger('paddle: {}, {}'.format(ppname, para_state_dict[ppname].shape))
                 raise e
 
 
@@ -86,11 +87,11 @@ if __name__ == '__main__':
     # transpose_img = norm_img.transpose(2, 0, 1)
     # transpose_img = np.expand_dims(transpose_img, 0).astype(np.float32)
     # inp = torch.Tensor(transpose_img)
-    # print('inp:', np.sum(transpose_img), np.mean(transpose_img), np.max(transpose_img), np.min(transpose_img))
+    # redirect_to_logger('inp:', np.sum(transpose_img), np.mean(transpose_img), np.max(transpose_img), np.min(transpose_img))
 
     # out = converter.net(inp)
     # out = out.data.numpy()
-    # print('out:', np.sum(out), np.mean(out), np.max(out), np.min(out))
+    # redirect_to_logger('out:', np.sum(out), np.mean(out), np.max(out), np.min(out))
 
     # save
     if args.dst_model_path is not None:
@@ -98,4 +99,4 @@ if __name__ == '__main__':
     else:
         save_name = '{}infer.pth'.format(os.path.basename(os.path.dirname(paddle_pretrained_model_path))[:-5])
     converter.save_pytorch_weights(save_name)
-    print('done.')
+    redirect_to_logger('done.')

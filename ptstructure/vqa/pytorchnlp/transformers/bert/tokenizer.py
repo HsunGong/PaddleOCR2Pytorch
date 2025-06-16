@@ -19,6 +19,7 @@ import unicodedata
 
 from .. import PretrainedTokenizer
 from ..tokenizer_utils import convert_to_unicode, whitespace_tokenize, _is_whitespace, _is_control, _is_punctuation
+from pytorchocr.utils.logging import redirect_to_logger
 
 __all__ = [
     'BasicTokenizer',
@@ -215,7 +216,7 @@ class WordpieceTokenizer(object):
 
                 wordpiecetokenizer = WordpieceTokenizer(vocab,unk_token)
                 inputs = wordpiecetokenizer.tokenize("unaffable")
-                print(inputs)
+                redirect_to_logger(inputs)
                 '''
                 ["un", "##aff", "##able"]
                 '''
@@ -294,7 +295,7 @@ class BertTokenizer(PretrainedTokenizer):
             tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
             inputs = tokenizer('He was a puppeteer')
-            print(inputs)
+            redirect_to_logger(inputs)
 
             '''
             {'input_ids': [101, 2002, 2001, 1037, 13997, 11510, 102], 'token_type_ids': [0, 0, 0, 0, 0, 0, 0]}

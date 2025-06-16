@@ -22,6 +22,7 @@ from pytorchocr.utils.utility import (
     check_and_read,
 )
 from pytorchocr.tools.infer.pytorchocr_utility import draw_ocr_box_txt
+from pytorchocr.utils.logging import redirect_to_logger
 
 
 
@@ -47,14 +48,14 @@ class TextSystem(object):
                 ),
                 img_crop_list[bno],
             )
-            print("{bno}, {}".format(rec_res[bno]))
+            redirect_to_logger("{bno}, {}".format(rec_res[bno]))
         self.crop_image_res_index += bbox_num
 
     def __call__(self, img, cls=True, slice={}) -> Tuple[Any, List[Tuple[str, float]], Dict[str, float]]:
         time_dict = {"det": 0, "rec": 0, "cls": 0, "all": 0}
 
         if img is None:
-            print("no valid image provided")
+            redirect_to_logger("no valid image provided")
             return None, None, time_dict
 
         start = time.time()
@@ -90,12 +91,12 @@ class TextSystem(object):
         time_dict["det"] = elapse
 
         if dt_boxes is None:
-            print("no dt_boxes found, elapsed : {}".format(elapse))
+            redirect_to_logger("no dt_boxes found, elapsed : {}".format(elapse))
             end = time.time()
             time_dict["all"] = end - start
             return None, None, time_dict
         else:
-            print(
+            redirect_to_logger(
                 "dt_boxes num : {}, elapsed : {}".format(len(dt_boxes), elapse)
             )
 
@@ -114,17 +115,17 @@ class TextSystem(object):
             img_crop_list, angle_list, elapse = self.text_classifier(
                 img_crop_list)
             time_dict["cls"] = elapse
-            print("cls num  : {}, elapse : {}".format(
+            redirect_to_logger("cls num  : {}, elapse : {}".format(
                 len(img_crop_list), elapse))
 
         if len(img_crop_list) > 1000:
-            print(
+            redirect_to_logger(
                 "rec crops num: {}, time and memory cost may be large.".format(len(img_crop_list))
             )
 
         rec_res, elapse = self.text_recognizer(img_crop_list)
         time_dict["rec"] = elapse
-        print("rec_res num  : {}, elapse : {}".format(
+        redirect_to_logger("rec_res num  : {}, elapse : {}".format(
             len(rec_res), elapse))
         if self.args.save_crop_res:
             self.draw_crop_rec_res(self.args.crop_res_save_dir, img_crop_list, rec_res)
@@ -179,7 +180,7 @@ def main(args):
             img = cv2.imread(image_file)
         if not flag_pdf:
             if img is None:
-                print("error in loading image:{}".format(image_file))
+                redirect_to_logger("error in loading image:{}".format(image_file))
                 continue
             imgs = [img]
         else:
@@ -193,19 +194,19 @@ def main(args):
             dt_boxes, rec_res, time_dict = text_sys(img)
             elapse = time.time() - starttime
             if len(imgs) > 1:
-                print(
+                redirect_to_logger(
                     str(idx)
                     + "_"
                     + str(index)
                     + "  Predict time of %s: %.3fs" % (image_file, elapse)
                 )
             else:
-                print(
+                redirect_to_logger(
                     str(idx) + "  Predict time of %s: %.3fs" % (image_file, elapse)
                 )
 
             for text, score in rec_res:
-                print("{}, {:.3f}".format(text, score))
+                redirect_to_logger("{}, {:.3f}".format(text, score))
 
             res = [
                 {
@@ -258,13 +259,13 @@ def main(args):
                     draw_img[:, :, ::-1],
                 )
 
-                print(
+                redirect_to_logger(
                     "The visualized image saved in {}".format(
                         os.path.join(draw_img_save_dir, os.path.basename(save_file))
                     )
                 )
 
-    print("The predict total time is {}".format(time.time() - _st))
+    redirect_to_logger("The predict total time is {}".format(time.time() - _st))
 
     with open(
         os.path.join(draw_img_save_dir, "system_results.txt"), "w", encoding="utf-8"

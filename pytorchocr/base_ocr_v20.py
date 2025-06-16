@@ -6,6 +6,7 @@ import cv2
 import torch
 
 from pytorchocr.modeling.architectures.base_model import BaseModel
+from pytorchocr.utils.logging import redirect_to_logger
 
 class BaseOCRV20:
     def __init__(self, config, **kwargs):
@@ -20,7 +21,7 @@ class BaseOCRV20:
 
     def load_paddle_weights(self, weights_path):
         raise NotImplementedError('implemented in converter.')
-        print('paddle weights loading...')
+        redirect_to_logger('paddle weights loading...')
         import paddle.fluid as fluid
         with fluid.dygraph.guard():
             para_state_dict, opti_state_dict = fluid.load_dygraph(weights_path)
@@ -41,8 +42,8 @@ class BaseOCRV20:
                 ppname = name
 
             else:
-                print('Redundance:')
-                print(name)
+                redirect_to_logger('Redundance:')
+                redirect_to_logger(name)
                 raise ValueError
             try:
                 if ppname.endswith('fc.weight'):
@@ -50,11 +51,11 @@ class BaseOCRV20:
                 else:
                     self.net.state_dict()[k].copy_(torch.Tensor(para_state_dict[ppname]))
             except Exception as e:
-                print('pytorch: {}, {}'.format(k, v.size()))
-                print('paddle: {}, {}'.format(ppname, para_state_dict[ppname].shape))
+                redirect_to_logger('pytorch: {}, {}'.format(k, v.size()))
+                redirect_to_logger('paddle: {}, {}'.format(ppname, para_state_dict[ppname].shape))
                 raise e
 
-        print('model is loaded: {}'.format(weights_path))
+        redirect_to_logger('model is loaded: {}'.format(weights_path))
 
     def read_pytorch_weights(self, weights_path):
         if not os.path.exists(weights_path):
@@ -71,11 +72,11 @@ class BaseOCRV20:
 
     def load_state_dict(self, weights):
         self.net.load_state_dict(weights)
-        print('weights is loaded.')
+        redirect_to_logger('weights is loaded.')
 
     def load_pytorch_weights(self, weights_path):
         self.net.load_state_dict(torch.load(weights_path))
-        print('model is loaded: {}'.format(weights_path))
+        redirect_to_logger('model is loaded: {}'.format(weights_path))
 
 
     def save_pytorch_weights(self, weights_path):
@@ -83,13 +84,13 @@ class BaseOCRV20:
             torch.save(self.net.state_dict(), weights_path, _use_new_zipfile_serialization=False)
         except:
             torch.save(self.net.state_dict(), weights_path) # _use_new_zipfile_serialization=False for torch>=1.6.0
-        print('model is saved: {}'.format(weights_path))
+        redirect_to_logger('model is saved: {}'.format(weights_path))
 
 
     def print_pytorch_state_dict(self):
-        print('pytorch:')
+        redirect_to_logger('pytorch:')
         for k,v in self.net.state_dict().items():
-            print('{}----{}'.format(k,type(v)))
+            redirect_to_logger('{}----{}'.format(k,type(v)))
 
     def read_paddle_weights(self, weights_path):
         try:
@@ -110,9 +111,9 @@ class BaseOCRV20:
         except:
             import paddle
             para_state_dict = paddle.load(weights_path)
-        print('paddle"')
+        redirect_to_logger('paddle"')
         for k,v in para_state_dict.items():
-            print('{}----{}'.format(k,type(v)))
+            redirect_to_logger('{}----{}'.format(k,type(v)))
 
 
     def inference(self, inputs):

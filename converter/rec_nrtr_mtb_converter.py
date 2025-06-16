@@ -10,18 +10,18 @@ from pytorchocr.base_ocr_v20 import BaseOCRV20
 class RecV20RecConverter(BaseOCRV20):
     def __init__(self, config, paddle_pretrained_model_path, **kwargs):
         para_state_dict, opti_state_dict = self.read_paddle_weights(paddle_pretrained_model_path)
-        print('config: ', config)
-        print(type(kwargs), kwargs)
+        redirect_to_logger('config: ', config)
+        redirect_to_logger(type(kwargs), kwargs)
         super(RecV20RecConverter, self).__init__(config, **kwargs)
         self.load_paddle_weights([para_state_dict, opti_state_dict])
-        print('model is loaded: {}'.format(paddle_pretrained_model_path))
+        redirect_to_logger('model is loaded: {}'.format(paddle_pretrained_model_path))
         self.net.eval()
 
 
     def load_paddle_weights(self, paddle_weights):
         para_state_dict, opti_state_dict = paddle_weights
-        # [print('paddle: {} ---- {}'.format(k, v.shape)) for k,v in para_state_dict.items()]
-        # [print('torch: {} ---- {}'.format(k, v.shape)) for k,v in self.net.state_dict().items()]
+        # [redirect_to_logger('paddle: {} ---- {}'.format(k, v.shape)) for k,v in para_state_dict.items()]
+        # [redirect_to_logger('torch: {} ---- {}'.format(k, v.shape)) for k,v in self.net.state_dict().items()]
         # exit()
 
         for k,v in para_state_dict.items():
@@ -42,15 +42,15 @@ class RecV20RecConverter(BaseOCRV20):
                 else:
                     self.net.state_dict()[name].copy_(torch.Tensor(v))
             except Exception as e:
-                print('pytorch: {}'.format(name))
-                print('paddle: {}'.format(k))
-                print('pytorch: {}'.format(self.net.state_dict()[name].shape))
-                print('paddle: {}'.format(v.shape))
-                print(e)
+                redirect_to_logger('pytorch: {}'.format(name))
+                redirect_to_logger('paddle: {}'.format(k))
+                redirect_to_logger('pytorch: {}'.format(self.net.state_dict()[name].shape))
+                redirect_to_logger('paddle: {}'.format(v.shape))
+                redirect_to_logger(e)
                 raise e
 
 
-        print('weights are loaded.')
+        redirect_to_logger('weights are loaded.')
 
 
 def read_network_config_from_yaml(yaml_path):
@@ -122,12 +122,12 @@ if __name__ == '__main__':
     # norm_img = (image * scale - mean) / std
     # transpose_img = norm_img.transpose(2, 0, 1)
     # transpose_img = np.expand_dims(transpose_img, 0).astype(np.float32)
-    # print('inp:', np.sum(transpose_img), np.mean(transpose_img), np.max(transpose_img), np.min(transpose_img))
+    # redirect_to_logger('inp:', np.sum(transpose_img), np.mean(transpose_img), np.max(transpose_img), np.min(transpose_img))
     # with torch.no_grad():
     #     inp = torch.Tensor(transpose_img)
     #     out = converter.net(inp)
     # out = out.data.numpy()
-    # print('out:', np.sum(out), np.mean(out), np.max(out), np.min(out))
+    # redirect_to_logger('out:', np.sum(out), np.mean(out), np.max(out), np.min(out))
 
     # save
     if args.dst_model_path is not None:
@@ -135,4 +135,4 @@ if __name__ == '__main__':
     else:
         save_name = '{}infer.pth'.format(os.path.basename(os.path.dirname(paddle_pretrained_model_path))[:-5])
     converter.save_pytorch_weights(save_name)
-    print('done.')
+    redirect_to_logger('done.')

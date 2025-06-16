@@ -11,6 +11,7 @@ from pytorchocr.modeling.common import Activation
 # from paddle import nn
 # import paddle.nn.functional as F
 # from paddle import ParamAttr
+from pytorchocr.utils.logging import redirect_to_logger
 
 
 class ConvBNLayer(nn.Module):
@@ -237,7 +238,7 @@ class Cross_Attention(nn.Module):
     def forward(self, f_common):
         # f_shape = paddle.shape(f_common)
         f_shape = f_common.size()
-        # print('f_shape: ', f_shape)
+        # redirect_to_logger('f_shape: ', f_shape)
 
         f_theta = self.theta_conv(f_common)
         f_phi = self.phi_conv(f_common)
@@ -299,7 +300,7 @@ class SASTFPN(nn.Module):
         f_common = F.relu(f_common)
 
         if self.with_cab:
-            # print('enhence f_common with CAB.')
+            # redirect_to_logger('enhence f_common with CAB.')
             f_common = self.cross_attention(f_common)
 
         return f_common

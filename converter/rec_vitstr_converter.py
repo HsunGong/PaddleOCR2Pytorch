@@ -10,21 +10,21 @@ from pytorchocr.base_ocr_v20 import BaseOCRV20
 class RecVitSTRConverter(BaseOCRV20):
     def __init__(self, config, paddle_pretrained_model_path, **kwargs):
         para_state_dict, opti_state_dict = self.read_paddle_weights(paddle_pretrained_model_path)
-        print('config: ', config)
+        redirect_to_logger('config: ', config)
         out_channels = list(para_state_dict.values())[-1].shape[0]
-        print('out_channels: ', out_channels)
-        print(type(kwargs), kwargs)
+        redirect_to_logger('out_channels: ', out_channels)
+        redirect_to_logger(type(kwargs), kwargs)
         kwargs['out_channels'] = out_channels
         super(RecVitSTRConverter, self).__init__(config, **kwargs)
         self.load_paddle_weights([para_state_dict, opti_state_dict])
-        print('model is loaded: {}'.format(paddle_pretrained_model_path))
+        redirect_to_logger('model is loaded: {}'.format(paddle_pretrained_model_path))
         self.net.eval()
 
 
     def load_paddle_weights(self, paddle_weights):
         para_state_dict, opti_state_dict = paddle_weights
-        # [print('paddle: {} ---- {}'.format(k, v.shape)) for k,v in para_state_dict.items()]
-        # [print('torch: {} ---- {}'.format(k, v.shape)) for k,v in self.net.state_dict().items()]
+        # [redirect_to_logger('paddle: {} ---- {}'.format(k, v.shape)) for k,v in para_state_dict.items()]
+        # [redirect_to_logger('torch: {} ---- {}'.format(k, v.shape)) for k,v in self.net.state_dict().items()]
         # exit()
 
         for k,v in self.net.state_dict().items():
@@ -47,14 +47,14 @@ class RecVitSTRConverter(BaseOCRV20):
                 else:
                     self.net.state_dict()[k].copy_(torch.Tensor(para_state_dict[name]))
             except Exception as e:
-                print('pytorch: {}'.format(k))
-                print('paddle: {}'.format(name))
-                print('pytorch: {}'.format(v.shape))
-                print('paddle: {}'.format(para_state_dict[name].shape))
-                print(e)
+                redirect_to_logger('pytorch: {}'.format(k))
+                redirect_to_logger('paddle: {}'.format(name))
+                redirect_to_logger('pytorch: {}'.format(v.shape))
+                redirect_to_logger('paddle: {}'.format(para_state_dict[name].shape))
+                redirect_to_logger(e)
                 raise e
 
-        print('weights are loaded.')
+        redirect_to_logger('weights are loaded.')
 
 
 def read_network_config_from_yaml(yaml_path):
@@ -116,7 +116,7 @@ if __name__ == '__main__':
     inp = torch.from_numpy(np.random.randn(1,1,224,224).astype(np.float32))
     with torch.no_grad():
         out = converter.net(inp)
-        print('out: ', out.shape)
+        redirect_to_logger('out: ', out.shape)
 
     # save
     if args.dst_model_path is not None:
@@ -124,4 +124,4 @@ if __name__ == '__main__':
     else:
         save_name = '{}infer.pth'.format(os.path.basename(os.path.dirname(paddle_pretrained_model_path))[:-5])
     converter.save_pytorch_weights(save_name)
-    print('done.')
+    redirect_to_logger('done.')

@@ -32,6 +32,7 @@ import pytorchocr.tools.infer.pytorchocr_utility as utility
 from pytorchocr.postprocess import build_post_process
 from pytorchocr.utils.logging import get_logger
 from pytorchocr.utils.utility import get_image_file_list, check_and_read
+from pytorchocr.utils.logging import redirect_to_logger
 
 logger = get_logger()
 
@@ -45,7 +46,7 @@ class TextSR(BaseOCRV20):
         self.weights_path = args.sr_model_path
         self.yaml_path = args.sr_yaml_path
         network_config = utility.AnalysisConfig(self.weights_path, self.yaml_path)
-        print(network_config)
+        redirect_to_logger(network_config)
         weights = self.read_pytorch_weights(self.weights_path)
 
         super(TextSR, self).__init__(network_config, **kwargs)
@@ -131,7 +132,7 @@ def main(args):
                     beg_no * args.sr_batch_num + i])[-1]
                 cv2.imwrite("inference_results/sr_{}".format(img_name_pure),
                             fm_sr[:, :, ::-1])
-                print("The visualized image saved in inference_results/sr_{}".
+                redirect_to_logger("The visualized image saved in inference_results/sr_{}".
                             format(img_name_pure))
 
     except Exception as E:

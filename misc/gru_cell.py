@@ -42,7 +42,7 @@ def paddle_grucell():
         sd = OrderedDict()
         for key, value in state_dict.items():
             v = value.numpy()
-            print(key, value.shape, np.sum(v), np.mean(v), np.max(v), np.min(v))
+            redirect_to_logger(key, value.shape, np.sum(v), np.mean(v), np.max(v), np.min(v))
             sd[key] = v
 
         np.save('gru_cell.npy', sd)
@@ -50,7 +50,7 @@ def paddle_grucell():
         inp = fluid.dygraph.to_variable(x)
         prev_hidden = fluid.dygraph.to_variable(y)
         ret, hidden = layer(inp, prev_hidden)
-        print(ret-hidden)
+        redirect_to_logger(ret-hidden)
     return ret.numpy()
 
 
@@ -68,7 +68,7 @@ def torch_grucell():
     sd = sd.tolist()
 
     for key, value in layer.state_dict().items():
-        print(key, value.shape)
+        redirect_to_logger(key, value.shape)
         layer.state_dict()[key].copy_(torch.Tensor(sd[key]))
 
 
@@ -78,13 +78,13 @@ def torch_grucell():
 
 
 if __name__ == '__main__':
-    print('==========paddle=================')
+    redirect_to_logger('==========paddle=================')
     a = paddle_grucell()
-    print(a.shape)
-    print('a: ', np.sum(a), np.mean(a), np.max(a), np.min(a))
-    print('===========pytorch================')
+    redirect_to_logger(a.shape)
+    redirect_to_logger('a: ', np.sum(a), np.mean(a), np.max(a), np.min(a))
+    redirect_to_logger('===========pytorch================')
     b = torch_grucell()
-    print(b.shape)
-    print('b: ', np.sum(b), np.mean(b), np.max(b), np.min(b))
-    # print('===========pytorch_m================')
+    redirect_to_logger(b.shape)
+    redirect_to_logger('b: ', np.sum(b), np.mean(b), np.max(b), np.min(b))
+    # redirect_to_logger('===========pytorch_m================')
     # torch_lstm_m()

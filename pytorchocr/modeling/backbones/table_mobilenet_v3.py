@@ -5,6 +5,7 @@ from __future__ import print_function
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from pytorchocr.utils.logging import redirect_to_logger
 
 __all__ = ['MobileNetV3']
 
@@ -180,7 +181,7 @@ class ConvBNLayer(nn.Module):
             elif self.act == "hardswish":
                 x = hard_swish(x)
             else:
-                print("The activation function({}) is selected incorrectly.".
+                redirect_to_logger("The activation function({}) is selected incorrectly.".
                       format(self.act))
                 exit()
         return x

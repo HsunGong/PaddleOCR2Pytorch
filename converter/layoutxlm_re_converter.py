@@ -4,6 +4,7 @@ import argparse
 import torch
 
 from ptstructure.vqa.pytorchnlp.transformers import LayoutXLMModel, LayoutXLMTokenizer, LayoutXLMForRelationExtraction
+from pytorchocr.utils.logging import redirect_to_logger
 
 
 def parse_args():
@@ -81,7 +82,7 @@ class LayoutXLMREConverter:
             torch.save(self.net.state_dict(), weights_path, _use_new_zipfile_serialization=False)
         except:
             torch.save(self.net.state_dict(), weights_path) # _use_new_zipfile_serialization=False for torch>=1.6.0
-        print('model is saved: {}'.format(weights_path))
+        redirect_to_logger('model is saved: {}'.format(weights_path))
 
 
 
@@ -90,4 +91,4 @@ if __name__ == '__main__':
     # loop for infer
     layoutXLM_ser = LayoutXLMREConverter(args)
 
-    print('done.')
+    redirect_to_logger('done.')

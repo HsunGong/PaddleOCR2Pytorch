@@ -35,6 +35,7 @@ from loguru import logger
 
 # from .generation_utils import GenerationMixin
 from .utils import InitTrackerMeta, fn_args_to_dict
+from pytorchocr.utils.logging import redirect_to_logger
 
 __all__ = [
     'PretrainedModel',
@@ -453,14 +454,14 @@ def load_layoutxlm_weights(torch_model, weights_path):
 
 def _load_torch_weights(torch_model, weights_path):
     torch_model.load_state_dict(torch.load(weights_path))
-    print('model is loaded: {}'.format(weights_path))
+    redirect_to_logger('model is loaded: {}'.format(weights_path))
 
 def _load_paddle_layoutxlm_weights(torch_model, weights_path):
     import paddle
     # load_layer_state_dict  = paddle.load(weights_path)
     with paddle.fluid.dygraph.guard():
         load_layer_state_dict, opti_state_dict = paddle.fluid.load_dygraph(weights_path)
-    # [print('{} ---- {}'.format(k, v.shape)) for k, v in torch_model.state_dict().items()]
+    # [redirect_to_logger('{} ---- {}'.format(k, v.shape)) for k, v in torch_model.state_dict().items()]
 
     load_layer = []
     not_load_layer = []
@@ -468,9 +469,9 @@ def _load_paddle_layoutxlm_weights(torch_model, weights_path):
     torch_state_dict = torch_model.state_dict()
 
     for k, v in load_layer_state_dict.items():
-        # print('paddle: {} ---- {}'.format(k, v.shape))
+        # redirect_to_logger('paddle: {} ---- {}'.format(k, v.shape))
         ppname = name = k
-        # print('---->>>>',v.shape, type(v))
+        # redirect_to_logger('---->>>>',v.shape, type(v))
         if ppname.endswith('._mean'):
             name = ppname.replace('._mean', '.running_mean')
 
@@ -496,4 +497,4 @@ def _load_paddle_layoutxlm_weights(torch_model, weights_path):
         else:
             torch_state_dict[name].copy_(torch.Tensor(v))
 
-    print('weights is loaded.')
+    redirect_to_logger('weights is loaded.')

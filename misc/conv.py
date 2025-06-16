@@ -48,7 +48,7 @@ def paddle_conv():
         np.save('fc_w.npy', list(simple_conv.state_dict()['weight'].numpy()))
         # np.save('fc_b.npy', list(simple_conv.state_dict().values())[1].numpy())
 
-        # print(ret)
+        # redirect_to_logger(ret)
     return ret.numpy()
 
 def torch_conv():
@@ -77,14 +77,14 @@ def torch_conv():
     # tfc.state_dict()['bias'].copy_(torch.Tensor(fc_b))
 
     tres = tfc(org)
-    # print(tres)
+    # redirect_to_logger(tres)
     return tres.data.numpy()
 
 
 if __name__ == '__main__':
     a = paddle_conv()
     b = torch_conv()
-    print('a: ', np.sum(a), np.mean(a), np.max(a), np.min(a))
-    print(b.shape)
-    print('b: ', np.sum(b), np.mean(b), np.max(b), np.min(b))
-    print(np.sum(np.abs(a-b)), np.mean(np.abs(a-b)))
+    redirect_to_logger('a: ', np.sum(a), np.mean(a), np.max(a), np.min(a))
+    redirect_to_logger(b.shape)
+    redirect_to_logger('b: ', np.sum(b), np.mean(b), np.max(b), np.min(b))
+    redirect_to_logger(np.sum(np.abs(a-b)), np.mean(np.abs(a-b)))

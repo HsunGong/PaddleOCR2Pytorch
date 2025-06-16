@@ -19,13 +19,14 @@ from pytorchocr.utils.logging import get_logger
 from ptstructure.table.matcher import distance, compute_iou
 from ptstructure.utility import parse_args
 import ptstructure.table.predict_structure as predict_strture
+from pytorchocr.utils.logging import redirect_to_logger
 
 logger = get_logger()
 
 
 def expand(pix, det_box, shape):
     x0, y0, x1, y1 = det_box
-    #     print(shape)
+    #     redirect_to_logger(shape)
     h, w, c = shape
     tmp_x0 = x0 - pix
     tmp_x1 = x1 + pix
@@ -49,8 +50,8 @@ class TableSystem(object):
         structure_res, elapse = self.table_structurer(copy.deepcopy(img))
         dt_boxes, elapse = self.text_detector(copy.deepcopy(img))
         dt_boxes = sorted_boxes(dt_boxes)
-        print('=-----------------------------------')
-        print(structure_res)
+        redirect_to_logger('=-----------------------------------')
+        redirect_to_logger(structure_res)
         r_boxes = []
         for box in dt_boxes:
             x_min = box[:, 0].min() - 1

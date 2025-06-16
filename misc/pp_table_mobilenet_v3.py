@@ -20,6 +20,7 @@ import paddle
 from paddle import nn
 import paddle.nn.functional as F
 from paddle import ParamAttr
+from pytorchocr.utils.logging import redirect_to_logger
 
 __all__ = ['MobileNetV3']
 
@@ -195,7 +196,7 @@ class ConvBNLayer(nn.Layer):
             elif self.act == "hardswish":
                 x = F.hardswish(x)
             else:
-                print("The activation function({}) is selected incorrectly.".
+                redirect_to_logger("The activation function({}) is selected incorrectly.".
                       format(self.act))
                 exit()
         return x

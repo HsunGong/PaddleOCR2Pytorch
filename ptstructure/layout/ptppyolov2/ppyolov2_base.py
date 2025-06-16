@@ -6,6 +6,7 @@ from .ppyolov2_darknet import DarkNet
 from .ppyolov2_resnet import ResNet
 from .ppyolov2_yolo_fpn import PPYOLOPAN
 from .ppyolov2_yolo_head import YOLOv3Head
+from pytorchocr.utils.logging import redirect_to_logger
 
 class PPYOLOv2Base(nn.Module):
     def __init__(self, **kwargs):
@@ -150,17 +151,17 @@ class PPYOLOv2Base(nn.Module):
         return x
 
     def load_paddle_weights(self, weights_path):
-        print('paddle weights loading...')
+        redirect_to_logger('paddle weights loading...')
         import paddle.fluid as fluid
         with fluid.dygraph.guard():
             para_state_dict, opti_state_dict = fluid.load_dygraph(weights_path)
 
         sd = para_state_dict
         for key, value in sd.items():
-            print('paddle: {} ---- {}'.format(key, value.shape))
+            redirect_to_logger('paddle: {} ---- {}'.format(key, value.shape))
 
         for key, value in self.state_dict().items():
-            print('pytorch: {} ---- {}'.format(key, value.shape))
+            redirect_to_logger('pytorch: {} ---- {}'.format(key, value.shape))
 
         for key, value in self.state_dict().items():
 
@@ -214,15 +215,15 @@ class PPYOLOv2Base(nn.Module):
                 self.state_dict()[key].copy_(torch.Tensor(weights))
 
             except Exception as e:
-                print('pp: ', key, sd[ppname].shape)
-                print('pt: ', key, self.state_dict()[key].shape)
+                redirect_to_logger('pp: ', key, sd[ppname].shape)
+                redirect_to_logger('pt: ', key, self.state_dict()[key].shape)
                 raise e
-        print('model is loaded: {}'.format(weights_path))
+        redirect_to_logger('model is loaded: {}'.format(weights_path))
 
 
     def load_pytorch_weights(self, weights_path):
         self.load_state_dict(torch.load(weights_path))
-        print('model is loaded: {}'.format(weights_path))
+        redirect_to_logger('model is loaded: {}'.format(weights_path))
 
 
     def save_pytorch_weights(self, weights_path):
@@ -230,4 +231,4 @@ class PPYOLOv2Base(nn.Module):
             torch.save(self.state_dict(), weights_path, _use_new_zipfile_serialization=False)
         except:
             torch.save(self.state_dict(), weights_path)  # _use_new_zipfile_serialization=False for torch>=1.6.0
-        print('model is saved: {}'.format(weights_path))
+        redirect_to_logger('model is saved: {}'.format(weights_path))

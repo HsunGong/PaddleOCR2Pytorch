@@ -6,25 +6,26 @@ import numpy as np
 import cv2
 import torch
 from pytorchocr.base_ocr_v20 import BaseOCRV20
+from pytorchocr.utils.logging import redirect_to_logger
 
 class PPOCRv2RecConverter(BaseOCRV20):
     def __init__(self, config, paddle_pretrained_model_path, **kwargs):
         para_state_dict, opti_state_dict = self.read_paddle_weights(paddle_pretrained_model_path)
         out_channels = list(para_state_dict.values())[-1].shape[0]
-        print('out_channels: ', out_channels)
-        print(type(kwargs), kwargs)
+        redirect_to_logger('out_channels: ', out_channels)
+        redirect_to_logger(type(kwargs), kwargs)
         kwargs['out_channels'] = out_channels
         super(PPOCRv2RecConverter, self).__init__(config, **kwargs)
         # self.load_paddle_weights(paddle_pretrained_model_path)
         self.load_paddle_weights([para_state_dict, opti_state_dict])
-        print('model is loaded: {}'.format(paddle_pretrained_model_path))
+        redirect_to_logger('model is loaded: {}'.format(paddle_pretrained_model_path))
         self.net.eval()
 
 
     def load_paddle_weights(self, paddle_weights):
         para_state_dict, opti_state_dict = paddle_weights
-        [print('paddle: {} ---- {}'.format(k, v.shape)) for k, v in para_state_dict.items()]
-        [print('pytorch: {} ---- {}'.format(k, v.shape)) for k, v in self.net.state_dict().items()]
+        [redirect_to_logger('paddle: {} ---- {}'.format(k, v.shape)) for k, v in para_state_dict.items()]
+        [redirect_to_logger('pytorch: {} ---- {}'.format(k, v.shape)) for k, v in self.net.state_dict().items()]
 
         for k,v in self.net.state_dict().items():
 
@@ -45,8 +46,8 @@ class PPOCRv2RecConverter(BaseOCRV20):
                 ppname = ppname.replace('head.', 'Student.head.')
 
             else:
-                print('Redundance:')
-                print(k)
+                redirect_to_logger('Redundance:')
+                redirect_to_logger(k)
                 raise ValueError
 
             try:
@@ -56,11 +57,11 @@ class PPOCRv2RecConverter(BaseOCRV20):
                     self.net.state_dict()[k].copy_(torch.Tensor(para_state_dict[ppname]))
 
             except Exception as e:
-                print('pytorch: {}, {}'.format(k, v.size()))
-                print('paddle: {}, {}'.format(ppname, para_state_dict[ppname].shape))
+                redirect_to_logger('pytorch: {}, {}'.format(k, v.size()))
+                redirect_to_logger('paddle: {}, {}'.format(ppname, para_state_dict[ppname].shape))
                 raise e
 
-        print('model is loaded.')
+        redirect_to_logger('model is loaded.')
 
 
 if __name__ == '__main__':
@@ -85,8 +86,8 @@ if __name__ == '__main__':
 
     out = converter.net(inp)
     out = out.data.numpy()
-    print('out:', np.sum(out), np.mean(out), np.max(out), np.min(out))
+    redirect_to_logger('out:', np.sum(out), np.mean(out), np.max(out), np.min(out))
 
     # save
     converter.save_pytorch_weights('ch_ptocr_v2_rec_infer.pth')
-    print('done.')
+    redirect_to_logger('done.')

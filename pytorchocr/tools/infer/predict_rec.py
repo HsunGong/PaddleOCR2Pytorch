@@ -14,6 +14,7 @@ from pytorchocr.base_ocr_v20 import BaseOCRV20
 import pytorchocr.tools.infer.pytorchocr_utility as utility
 from pytorchocr.postprocess import build_post_process
 from pytorchocr.utils.utility import get_image_file_list, check_and_read_gif
+from pytorchocr.utils.logging import redirect_to_logger
 
 
 class TextRecognizer(BaseOCRV20):
@@ -448,19 +449,19 @@ def main(args):
         if not flag:
             img = cv2.imread(image_file)
         if img is None:
-            print("error in loading image:{}".format(image_file))
+            redirect_to_logger("error in loading image:{}".format(image_file))
             continue
         valid_image_file_list.append(image_file)
         img_list.append(img)
     try:
         rec_res, predict_time = text_recognizer(img_list)
     except Exception as e:
-        print(e)
+        redirect_to_logger(e)
         exit()
     for ino in range(len(img_list)):
-        print("Predicts of {}:{}".format(valid_image_file_list[ino], rec_res[
+        redirect_to_logger("Predicts of {}:{}".format(valid_image_file_list[ino], rec_res[
             ino]))
-    print("Total predict time for {} images, cost: {:.3f}".format(
+    redirect_to_logger("Total predict time for {} images, cost: {:.3f}".format(
         len(img_list), predict_time))
 
 

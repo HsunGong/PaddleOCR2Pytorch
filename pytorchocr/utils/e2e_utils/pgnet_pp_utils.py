@@ -12,6 +12,7 @@ sys.path.append(__dir__)
 sys.path.append(os.path.join(__dir__, '..'))
 from .extract_textpoint_slow import *
 from .extract_textpoint_fast import generate_pivot_list_fast, restore_poly
+from pytorchocr.utils.logging import redirect_to_logger
 
 
 class PGNet_PostProcess(object):
@@ -141,7 +142,7 @@ class PGNet_PostProcess(object):
             elif self.valid_set == 'totaltext':
                 poly_list.append(detected_poly)
             else:
-                print('--> Not supported format.')
+                redirect_to_logger('--> Not supported format.')
                 exit(-1)
         data = {
             'points': poly_list,

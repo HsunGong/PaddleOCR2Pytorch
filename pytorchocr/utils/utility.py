@@ -3,6 +3,7 @@ import imghdr
 import numpy as np
 import cv2
 import logging
+from pytorchocr.utils.logging import redirect_to_logger
 
 def get_image_file_list(img_file):
     imgs_lists = []
@@ -28,7 +29,7 @@ def check_and_read_gif(img_path):
         ret, frame = gif.read()
         if not ret:
             # logger = logging.getLogger('ppocr')
-            print("Cannot read {}. This gif image maybe corrupted.")
+            redirect_to_logger("Cannot read {}. This gif image maybe corrupted.")
             # logger.info("Cannot read {}. This gif image maybe corrupted.")
             return None, False
         if len(frame.shape) == 2 or frame.shape[-1] == 1:

@@ -19,6 +19,7 @@ import pytorchocr.tools.infer.pytorchocr_utility as utility
 from pytorchocr.utils.utility import get_image_file_list, check_and_read_gif
 from pytorchocr.data import create_operators, transform
 from pytorchocr.postprocess import build_post_process
+from pytorchocr.utils.logging import redirect_to_logger
 
 
 class TextE2E(BaseOCRV20):
@@ -56,7 +57,7 @@ class TextE2E(BaseOCRV20):
             postprocess_params["mode"] = args.e2e_pgnet_mode
             self.e2e_pgnet_polygon = args.e2e_pgnet_polygon
         else:
-            print("unknown e2e_algorithm:{}".format(self.e2e_algorithm))
+            redirect_to_logger("unknown e2e_algorithm:{}".format(self.e2e_algorithm))
             sys.exit(0)
 
         self.preprocess_op = create_operators(pre_process_list)
@@ -134,18 +135,18 @@ if __name__ == "__main__":
         if not flag:
             img = cv2.imread(image_file)
         if img is None:
-            print("error in loading image:{}".format(image_file))
+            redirect_to_logger("error in loading image:{}".format(image_file))
             continue
         points, strs, elapse = text_detector(img)
         if count > 0:
             total_time += elapse
         count += 1
-        print("Predict time of {}: {}".format(image_file, elapse))
+        redirect_to_logger("Predict time of {}: {}".format(image_file, elapse))
         src_im = utility.draw_e2e_res(points, strs, image_file)
         img_name_pure = os.path.split(image_file)[-1]
         img_path = os.path.join(draw_img_save,
                                 "e2e_res_{}".format(img_name_pure))
         cv2.imwrite(img_path, src_im)
-        print("The visualized image saved in {}".format(img_path))
+        redirect_to_logger("The visualized image saved in {}".format(img_path))
     if count > 1:
-        print("Avg Time: {}".format(total_time / (count - 1)))
+        redirect_to_logger("Avg Time: {}".format(total_time / (count - 1)))

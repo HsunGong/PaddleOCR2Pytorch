@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 import torch
 from pytorchocr.base_ocr_v20 import BaseOCRV20
+from pytorchocr.utils.logging import redirect_to_logger
 
 class DetV20DetConverter(BaseOCRV20):
     def __init__(self, config, paddle_pretrained_model_path, **kwargs):
@@ -48,8 +49,8 @@ class DetV20DetConverter(BaseOCRV20):
             elif name.endswith('bias') or name.endswith('weight'):
                 ppname = name
             else:
-                print('Redundance:')
-                print(name)
+                redirect_to_logger('Redundance:')
+                redirect_to_logger(name)
                 raise ValueError
 
 
@@ -92,7 +93,7 @@ if __name__ == '__main__':
     kwargs = {}
     paddle_pretrained_model_path = os.path.join(os.path.abspath(args.src_model_path), 'best_accuracy')
     converter = DetV20DetConverter(cfg, paddle_pretrained_model_path, **kwargs)
-    print('todo')
+    redirect_to_logger('todo')
 
     # image = cv2.imread('doc/imgs_en/img_10.jpg')
     # image = cv2.resize(image, (320, 448))
@@ -106,7 +107,7 @@ if __name__ == '__main__':
     #     inp = torch.Tensor(transpose_img)
     #     out = converter.net(inp)
     # out = out['maps'].data.numpy()
-    # print('out:', np.sum(out), np.mean(out), np.max(out), np.min(out))
+    # redirect_to_logger('out:', np.sum(out), np.mean(out), np.max(out), np.min(out))
 
     # save
     if args.dst_model_path is not None:
@@ -114,4 +115,4 @@ if __name__ == '__main__':
     else:
         save_name = '{}infer.pth'.format(os.path.basename(os.path.dirname(paddle_pretrained_model_path))[:-5])
     converter.save_pytorch_weights(save_name)
-    print('done.')
+    redirect_to_logger('done.')

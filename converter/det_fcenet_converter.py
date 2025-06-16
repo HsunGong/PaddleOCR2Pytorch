@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 import torch
 from pytorchocr.base_ocr_v20 import BaseOCRV20
+from pytorchocr.utils.logging import redirect_to_logger
 
 class DetFCENetConverter(BaseOCRV20):
     def __init__(self, config, paddle_pretrained_model_path, **kwargs):
@@ -17,8 +18,8 @@ class DetFCENetConverter(BaseOCRV20):
         with fluid.dygraph.guard():
             para_state_dict, opti_state_dict = fluid.load_dygraph(weights_path)
 
-        # [print('paddle: {} ---- {}'.format(k, v.shape)) for k, v in para_state_dict.items()]
-        # [print('pytorch: {} ---- {}'.format(k, v.shape)) for k, v in self.net.state_dict().items()]
+        # [redirect_to_logger('paddle: {} ---- {}'.format(k, v.shape)) for k, v in para_state_dict.items()]
+        # [redirect_to_logger('pytorch: {} ---- {}'.format(k, v.shape)) for k, v in self.net.state_dict().items()]
         # exit()
 
         stages_replace_stage_flag = False
@@ -54,16 +55,16 @@ class DetFCENetConverter(BaseOCRV20):
             elif name.endswith('bias') or name.endswith('weight'):
                 ppname = name
             else:
-                print('Redundance:')
-                print(name)
+                redirect_to_logger('Redundance:')
+                redirect_to_logger(name)
                 raise ValueError
 
             try:
                 self.net.state_dict()[k].copy_(torch.Tensor(para_state_dict[ppname]))
             except Exception as e:
-                print('exception:')
-                print('pytorch: {}, {}'.format(k, v.size()))
-                print('paddle: {}, {}'.format(ppname, para_state_dict[ppname].shape))
+                redirect_to_logger('exception:')
+                redirect_to_logger('pytorch: {}, {}'.format(k, v.size()))
+                redirect_to_logger('paddle: {}, {}'.format(ppname, para_state_dict[ppname].shape))
                 raise e
 
 def read_network_config_from_yaml(yaml_path):
@@ -125,7 +126,7 @@ if __name__ == '__main__':
     paddle_pretrained_model_path = os.path.join(os.path.abspath(args.src_model_path), 'best_accuracy')
     # paddle_pretrained_model_path = None
     converter = DetFCENetConverter(cfg, paddle_pretrained_model_path, **kwargs)
-    print('todo')
+    redirect_to_logger('todo')
 
     inp = torch.from_numpy(np.random.randn(1,3,736,1312).astype(np.float32))
     with torch.no_grad():
@@ -137,4 +138,4 @@ if __name__ == '__main__':
     else:
         save_name = '{}infer.pth'.format(os.path.basename(os.path.dirname(paddle_pretrained_model_path))[:-5])
     converter.save_pytorch_weights(save_name)
-    print('done.')
+    redirect_to_logger('done.')

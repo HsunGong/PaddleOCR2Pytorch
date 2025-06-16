@@ -99,7 +99,7 @@ def paddle_grucell():
         sd = OrderedDict()
         for key, value in state_dict.items():
             v = value.numpy()
-            print(key, value.shape, np.sum(v), np.mean(v), np.max(v), np.min(v))
+            redirect_to_logger(key, value.shape, np.sum(v), np.mean(v), np.max(v), np.min(v))
             sd[key] = v
 
         np.save('att_gru_cell.npy', sd)
@@ -108,7 +108,7 @@ def paddle_grucell():
         inputs = fluid.dygraph.to_variable(y)
         char_onehots = fluid.dygraph.to_variable(z)
         (outputs, hidden), alpha = layer(hidden, inputs, char_onehots)
-        # print(len(outputs))
+        # redirect_to_logger(len(outputs))
     return outputs.numpy()
     # return alpha.numpy()
 
@@ -132,15 +132,15 @@ def torch_grucell():
     sd = sd.tolist()
 
     for key, value in layer.state_dict().items():
-        print(key, value.shape)
+        redirect_to_logger(key, value.shape)
         try:
             if key.endswith('.weight'):
                 layer.state_dict()[key].copy_(torch.Tensor(sd[key].T))
             else:
                 layer.state_dict()[key].copy_(torch.Tensor(sd[key]))
         except Exception as e:
-            print('pp: ', key, sd[key].shape)
-            print('pt: ', key, layer.state_dict()[key].shape)
+            redirect_to_logger('pp: ', key, sd[key].shape)
+            redirect_to_logger('pt: ', key, layer.state_dict()[key].shape)
             raise e
 
 
@@ -151,11 +151,11 @@ def torch_grucell():
 
 
 if __name__ == '__main__':
-    print('==========paddle=================')
+    redirect_to_logger('==========paddle=================')
     a = paddle_grucell()
-    print(a.shape)
-    print('a: ', np.sum(a), np.mean(a), np.max(a), np.min(a))
-    print('===========pytorch================')
+    redirect_to_logger(a.shape)
+    redirect_to_logger('a: ', np.sum(a), np.mean(a), np.max(a), np.min(a))
+    redirect_to_logger('===========pytorch================')
     b = torch_grucell()
-    print(b.shape)
-    print('b: ', np.sum(b), np.mean(b), np.max(b), np.min(b))
+    redirect_to_logger(b.shape)
+    redirect_to_logger('b: ', np.sum(b), np.mean(b), np.max(b), np.min(b))

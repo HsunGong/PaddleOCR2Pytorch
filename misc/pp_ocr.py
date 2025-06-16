@@ -7,12 +7,13 @@ from paddle import fluid
 
 from paddle.inference import Config
 from paddle.inference import create_predictor
+from pytorchocr.utils.logging import redirect_to_logger
 
 class PaddlePaddleOCR:
     def __init__(self, cfg):
         self.cfg = cfg
         self.predictor = self.init_predictor(cfg)
-        print('model is inited')
+        redirect_to_logger('model is inited')
 
     def init_predictor(self, cfg):
         model_dir = cfg['model_dir']
@@ -58,7 +59,7 @@ class PaddlePaddleOCR:
 
 
 if __name__ == '__main__':
-    print('begin...')
+    redirect_to_logger('begin...')
 
     USE_GPU = False
     # root_dir = './ch_ppocr_server_v2.0_det_infer'
@@ -78,8 +79,8 @@ if __name__ == '__main__':
     np.random.seed(666)
     # inp = np.random.rand(c, h, w).astype(np.float32)
     inp = np.random.randn(c, h, w).astype(np.float32)
-    print('==> ',np.sum(inp), np.mean(inp), np.max(inp), np.min(inp))
-    # print(inp, inp.shape, inp.dtype, '\n')
+    redirect_to_logger('==> ',np.sum(inp), np.mean(inp), np.max(inp), np.min(inp))
+    # redirect_to_logger(inp, inp.shape, inp.dtype, '\n')
 
     import cv2
 
@@ -91,7 +92,7 @@ if __name__ == '__main__':
     norm_img = (image * scale - mean) / std
     inp = norm_img
     inp = inp.transpose(2, 0, 1)
-    print(np.sum(inp), np.mean(inp), np.max(inp), np.min(inp))
+    redirect_to_logger(np.sum(inp), np.mean(inp), np.max(inp), np.min(inp))
 
     #
     # import cv2
@@ -107,15 +108,15 @@ if __name__ == '__main__':
 
 
     inp = inp.astype(np.float32)
-    # print(inp, inp.shape, inp.dtype, '\n')
+    # redirect_to_logger(inp, inp.shape, inp.dtype, '\n')
 
     model_file_path = os.path.abspath(os.path.join(root_dir, MODEL_DIR))
     params_file_path = os.path.abspath(os.path.join(root_dir, PARAMS_FILE))
     if not os.path.exists(model_file_path):
-        print("not find model file path {}".format(model_file_path))
+        redirect_to_logger("not find model file path {}".format(model_file_path))
         sys.exit(0)
     if not os.path.exists(params_file_path):
-        print("not find params file path {}".format(params_file_path))
+        redirect_to_logger("not find params file path {}".format(params_file_path))
         sys.exit(0)
 
     cfg = {}
@@ -125,9 +126,9 @@ if __name__ == '__main__':
 
     paddleOCR = PaddlePaddleOCR(cfg)
     results = paddleOCR.run(inp)
-    print(results[0].shape)
-    print(np.sum(results), np.mean(results), np.max(results), np.min(results))
-    print('done!')
+    redirect_to_logger(results[0].shape)
+    redirect_to_logger(np.sum(results), np.mean(results), np.max(results), np.min(results))
+    redirect_to_logger('done!')
 
 
 

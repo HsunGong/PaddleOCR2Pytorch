@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 import torch
 from pytorchocr.base_ocr_v20 import BaseOCRV20
+from pytorchocr.utils.logging import redirect_to_logger
 
 
 class PPStructureTableDetConverter(BaseOCRV20):
@@ -14,13 +15,13 @@ class PPStructureTableDetConverter(BaseOCRV20):
         self.net.eval()
 
     def load_paddle_weights(self, weights_path):
-        print('paddle weights loading...')
+        redirect_to_logger('paddle weights loading...')
         import paddle.fluid as fluid
         with fluid.dygraph.guard():
             para_state_dict, opti_state_dict = fluid.load_dygraph(weights_path)
 
-        [print('paddle: {} ---- {}'.format(k, v.shape)) for k, v in para_state_dict.items()]
-        [print('pytorch: {} ---- {}'.format(k, v.shape)) for k, v in self.net.state_dict().items()]
+        [redirect_to_logger('paddle: {} ---- {}'.format(k, v.shape)) for k, v in para_state_dict.items()]
+        [redirect_to_logger('pytorch: {} ---- {}'.format(k, v.shape)) for k, v in self.net.state_dict().items()]
 
         for k,v in self.net.state_dict().items():
             keyword = 'stages.'
@@ -40,12 +41,12 @@ class PPStructureTableDetConverter(BaseOCRV20):
             elif name.endswith('bias') or name.endswith('weight'):
                 ppname = name
             else:
-                print('Redundance:')
-                print(name)
+                redirect_to_logger('Redundance:')
+                redirect_to_logger(name)
                 raise ValueError
 
             self.net.state_dict()[k].copy_(torch.Tensor(para_state_dict[ppname]))
-        print('model is loaded: {}'.format(weights_path))
+        redirect_to_logger('model is loaded: {}'.format(weights_path))
 
 
 if __name__ == '__main__':
@@ -64,14 +65,14 @@ if __name__ == '__main__':
     paddle_pretrained_model_path = os.path.join(os.path.abspath(args.src_model_path), 'best_accuracy')
     converter = PPStructureTableDetConverter(cfg, paddle_pretrained_model_path)
 
-    print('todo')
+    redirect_to_logger('todo')
 
     np.random.seed(666)
     inp = torch.from_numpy(np.random.randn(1, 3, 640, 640).astype(np.float32))
     with torch.no_grad():
         out = converter.net(inp)['maps'].cpu().numpy()
-    print('out:', np.sum(out), np.mean(out), np.max(out), np.min(out))
+    redirect_to_logger('out:', np.sum(out), np.mean(out), np.max(out), np.min(out))
 
     # save
     converter.save_pytorch_weights('en_ptocr_mobile_v2.0_table_det_infer.pth')
-    print('done.')
+    redirect_to_logger('done.')

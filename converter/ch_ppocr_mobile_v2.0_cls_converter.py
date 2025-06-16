@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 import torch
 from pytorchocr.base_ocr_v20 import BaseOCRV20
+from pytorchocr.utils.logging import redirect_to_logger
 
 
 class MobileV20DetConverter(BaseOCRV20):
@@ -14,7 +15,7 @@ class MobileV20DetConverter(BaseOCRV20):
         self.net.eval()
 
     def load_paddle_weights(self, weights_path):
-        print('paddle weights loading...')
+        redirect_to_logger('paddle weights loading...')
         import paddle.fluid as fluid
         with fluid.dygraph.guard():
             para_state_dict, opti_state_dict = fluid.load_dygraph(weights_path)
@@ -33,8 +34,8 @@ class MobileV20DetConverter(BaseOCRV20):
                 ppname = name
 
             else:
-                print('Redundance:')
-                print(name)
+                redirect_to_logger('Redundance:')
+                redirect_to_logger(name)
                 raise ValueError
 
             try:
@@ -43,11 +44,11 @@ class MobileV20DetConverter(BaseOCRV20):
                 else:
                     self.net.state_dict()[k].copy_(torch.Tensor(para_state_dict[ppname]))
             except Exception as e:
-                print('pytorch: {}, {}'.format(k, v.size()))
-                print('paddle: {}, {}'.format(ppname, para_state_dict[ppname].shape))
+                redirect_to_logger('pytorch: {}, {}'.format(k, v.size()))
+                redirect_to_logger('paddle: {}, {}'.format(ppname, para_state_dict[ppname].shape))
                 raise e
 
-        print('model is loaded: {}'.format(weights_path))
+        redirect_to_logger('model is loaded: {}'.format(weights_path))
 
 
 if __name__ == '__main__':
@@ -65,7 +66,7 @@ if __name__ == '__main__':
     paddle_pretrained_model_path = os.path.join(os.path.abspath(args.src_model_path), 'best_accuracy')
 
     converter = MobileV20DetConverter(cfg, paddle_pretrained_model_path)
-    print('todo')
+    redirect_to_logger('todo')
 
     # image = cv2.imread('images/Snipaste.jpg')
     # image = cv2.resize(image, (192, 48))
@@ -77,15 +78,15 @@ if __name__ == '__main__':
     # transpose_img = np.expand_dims(transpose_img, 0)
     # inputs = transpose_img.astype(np.float32)
 
-    # print(np.sum(inputs), np.mean(inputs), np.max(inputs), np.min(inputs))
-    # print('done')
+    # redirect_to_logger(np.sum(inputs), np.mean(inputs), np.max(inputs), np.min(inputs))
+    # redirect_to_logger('done')
 
     # inp = torch.Tensor(inputs)
 
     # out = converter.net(inp)
-    # print('out:')
-    # print(out.data.numpy())
+    # redirect_to_logger('out:')
+    # redirect_to_logger(out.data.numpy())
 
     # save
     converter.save_pytorch_weights('ch_ptocr_mobile_v2.0_cls_infer.pth')
-    print('done.')
+    redirect_to_logger('done.')

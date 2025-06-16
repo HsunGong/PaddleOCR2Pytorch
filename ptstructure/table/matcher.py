@@ -1,4 +1,5 @@
 import json
+from pytorchocr.utils.logging import redirect_to_logger
 
 
 def distance(box_1, box_2):
@@ -108,7 +109,7 @@ def matcher_refine_row(gt_bboxes, pred_bboxes):
     pred_bboxes = []
     while (len(before_refine_pred_bboxes) != 0):
         row_bboxes, before_refine_pred_bboxes = get_rows(before_refine_pred_bboxes)
-        print(row_bboxes)
+        redirect_to_logger(row_bboxes)
         pred_bboxes.extend(refine_rows(row_bboxes))
     all_dis = []
     ious = []
@@ -139,9 +140,9 @@ def matcher_structure_1(gt_bboxes, pred_bboxes_rows, pred_bboxes):
         row_bboxes = sorted(row_bboxes, key=lambda key: key[0])
         if len(pred_bboxes_rows) > 0:
             match_bboxes_ready.extend(pred_bboxes_rows.pop(0))
-        print(row_bboxes)
+        redirect_to_logger(row_bboxes)
         for i, gt_box in enumerate(row_bboxes):
-            # print(gt_box)
+            # redirect_to_logger(gt_box)
             pred_distances = []
             distances = []
             for pred_bbox in pred_bboxes:
@@ -149,7 +150,7 @@ def matcher_structure_1(gt_bboxes, pred_bboxes_rows, pred_bboxes):
             for j, pred_box in enumerate(match_bboxes_ready):
                 distances.append(distance(gt_box, pred_box))
             index = pred_distances.index(min(distances))
-            # print('index', index)
+            # redirect_to_logger('index', index)
             if index not in matched.keys():
                 matched[index] = [gt_box_index]
             else:
@@ -175,7 +176,7 @@ def matcher_structure(gt_bboxes, pred_bboxes_rows, pred_bboxes):
         distances = []
         gap_pre = gt_box[1] - pre_bbox[1]
         gap_pre_1 = gt_box[0] - pre_bbox[2]
-        # print(gap_pre, len(pred_bboxes_rows))
+        # redirect_to_logger(gap_pre, len(pred_bboxes_rows))
         if (gap_pre_1 < 0 and len(pred_bboxes_rows) > 0):
             match_bboxes_ready.extend(pred_bboxes_rows.pop(0))
         if len(pred_bboxes_rows) == 1:
@@ -184,13 +185,13 @@ def matcher_structure(gt_bboxes, pred_bboxes_rows, pred_bboxes):
             match_bboxes_ready.extend(pred_bboxes_rows.pop(0))
         if len(match_bboxes_ready) == 0 and len(pred_bboxes_rows) == 0:
             break
-        # print(match_bboxes_ready)
+        # redirect_to_logger(match_bboxes_ready)
         for j, pred_box in enumerate(match_bboxes_ready):
             distances.append(distance(gt_box, pred_box))
         index = pred_distances.index(min(distances))
-        # print(gt_box, index)
+        # redirect_to_logger(gt_box, index)
         # match_bboxes_ready.pop(distances.index(min(distances)))
-        print(gt_box, match_bboxes_ready[distances.index(min(distances))])
+        redirect_to_logger(gt_box, match_bboxes_ready[distances.index(min(distances))])
         if index not in matched.keys():
             matched[index] = [i]
         else:

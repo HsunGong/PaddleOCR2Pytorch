@@ -18,7 +18,7 @@ def paddle_func():
     # x = np.load('input.npy', allow_pickle=True)
     x = np.random.rand(input_shape[0], input_shape[1], input_shape[2]).astype(np.float32)
     np.save('input.npy', x)
-    print('pp input size: ', x.shape, np.sum(x), np.mean(x), np.max(x), np.min(x))
+    redirect_to_logger('pp input size: ', x.shape, np.sum(x), np.mean(x), np.max(x), np.min(x))
 
     # np.save('org.npy', x)
     with fluid.dygraph.guard():
@@ -37,14 +37,14 @@ def paddle_func():
         sd = OrderedDict()
         for key, value in state_dict.items():
             v = value.numpy()
-            print(key, value.shape, np.sum(v), np.mean(v), np.max(v), np.min(v))
+            redirect_to_logger(key, value.shape, np.sum(v), np.mean(v), np.max(v), np.min(v))
             sd[key] = v
 
         np.save('layernorm.npy', sd)
 
         inputs = fluid.dygraph.to_variable(x)
         out = layer(inputs)
-        # print(len(outputs))
+        # redirect_to_logger(len(outputs))
     return out.numpy()
     # return alpha.numpy()
 
@@ -53,7 +53,7 @@ def torch_func():
     np.random.seed(SEED)
     x = np.load('input.npy', allow_pickle=True)
     # x = np.random.rand(input_shape[0], input_shape[1], input_shape[2], input_shape[3]).astype(np.float32)
-    print('pt input size: ', x.shape, np.sum(x), np.mean(x), np.max(x), np.min(x))
+    redirect_to_logger('pt input size: ', x.shape, np.sum(x), np.mean(x), np.max(x), np.min(x))
     inputs = torch.Tensor(x)
     layer = torch.nn.LayerNorm(normalized_shape=d_model,
                                elementwise_affine=True,
@@ -96,8 +96,8 @@ def torch_func():
             ppname = name
 
         else:
-            print('Redundance:')
-            print(name)
+            redirect_to_logger('Redundance:')
+            redirect_to_logger(name)
             raise ValueError
 
 
@@ -114,14 +114,14 @@ def torch_func():
             else:
                 layer.state_dict()[key].copy_(torch.Tensor(sd[ppname]))
         except Exception as e:
-            print('except: pt: ', key)
-            print('except: pp: ', ppname)
-            print('except: pt: ', layer.state_dict()[key].shape)
-            print('except: pp: ', sd[ppname].shape)
+            redirect_to_logger('except: pt: ', key)
+            redirect_to_logger('except: pp: ', ppname)
+            redirect_to_logger('except: pt: ', layer.state_dict()[key].shape)
+            redirect_to_logger('except: pp: ', sd[ppname].shape)
             raise e
 
         v = layer.state_dict()[key].numpy()
-        print(ppname, v.shape, np.sum(v), np.mean(v), np.max(v), np.min(v))
+        redirect_to_logger(ppname, v.shape, np.sum(v), np.mean(v), np.max(v), np.min(v))
 
 
     out = layer(inputs)
@@ -130,11 +130,11 @@ def torch_func():
 
 
 if __name__ == '__main__':
-    print('==========paddle=================')
+    redirect_to_logger('==========paddle=================')
     a = paddle_func()
-    print(a.shape)
-    print('a: ', np.sum(a), np.mean(a), np.max(a), np.min(a))
-    print('===========pytorch================')
+    redirect_to_logger(a.shape)
+    redirect_to_logger('a: ', np.sum(a), np.mean(a), np.max(a), np.min(a))
+    redirect_to_logger('===========pytorch================')
     b = torch_func()
-    print(b.shape)
-    print('b: ', np.sum(b), np.mean(b), np.max(b), np.min(b))
+    redirect_to_logger(b.shape)
+    redirect_to_logger('b: ', np.sum(b), np.mean(b), np.max(b), np.min(b))

@@ -186,7 +186,7 @@ class PPYOLOv2:
             scores.append(score)
             classes.append(cls)
 
-        # print(preds)
+        # redirect_to_logger(preds)
         # exit()
         return boxes, scores, classes
 

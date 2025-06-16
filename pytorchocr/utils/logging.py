@@ -4,6 +4,9 @@ import logging
 import functools
 import torch.distributed as dist
 
+import logging
+from typing import Any, List, Optional
+
 logger_initialized = {}
 
 
@@ -45,8 +48,27 @@ def get_logger(name='root', log_file=None, log_level=logging.DEBUG):
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
     # if dist.get_rank() == 0:
-    #     logger.setLevel(log_level)
+    logger.setLevel(log_level)
     # else:
     #     logger.setLevel(logging.ERROR)
     logger_initialized[name] = True
     return logger
+
+logger = get_logger("pytorchocr", log_level=logging.INFO)
+
+def redirect_to_logger(*args: Any, sep: Optional[str] = ' ', end: Optional[str] = '\n', level: int = logging.INFO) -> None:
+    """
+    功能与print类似，但会把输出重定向到logging模块。
+    能够处理print支持的所有参数，并转化为一条logging记录。
+
+    参数:
+        *args: 要打印的对象。
+        sep: 分隔符，用于分隔多个对象，默认是空格。
+        end: 结尾字符串，添加到最后一个对象之后，默认是换行符。
+        logger: 要使用的logger实例，若未提供则使用root logger。
+        level: 日志级别，默认是INFO。
+    """
+    # logger = logging.getLogger("pytorchocr")
+    str_args: List[str] = [str(arg) for arg in args]
+    combined_str: str = sep.join(str_args) + end
+    logger.log(level, combined_str.rstrip('\n'))

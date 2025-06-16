@@ -28,6 +28,7 @@ import torch.nn as nn
 from torch.nn import Module as Layer
 
 from .. import PretrainedModel, register_base_model
+from pytorchocr.utils.logging import redirect_to_logger
 
 __all__ = [
     "LayoutLMModel",
@@ -387,7 +388,7 @@ class LayoutLMModel(LayoutLMPretrainedModel):
                 encoder_outputs[-1] = self.encoder.norm(encoder_outputs[-1])
             pooled_output = self.pooler(encoder_outputs[-1])
         else:
-            print(embedding_output.shape, embedding_output.dtype, attention_mask.dtype, self.pooler.dense.weight.dtype, attention_mask.shape, ' <<<<<<<<<<<<<<<<<<')
+            redirect_to_logger(embedding_output.shape, embedding_output.dtype, attention_mask.dtype, self.pooler.dense.weight.dtype, attention_mask.shape, ' <<<<<<<<<<<<<<<<<<')
             sequence_output = self.encoder(embedding_output, attention_mask.squeeze(2).squeeze(1).type(torch.bool))
             pooled_output = self.pooler(sequence_output)
         if output_hidden_states:
@@ -468,7 +469,7 @@ class LayoutLMForTokenClassification(LayoutLMPretrainedModel):
                 inputs = {k:paddle.to_tensor([v]) for (k, v) in inputs.items()}
 
                 logits = model(**inputs)
-                print(logits.shape)
+                redirect_to_logger(logits.shape)
                 # [1, 13, 2]
 
         """
