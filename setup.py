@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pytorchocr',
-    version='0.1.0',
+    version='0.2.0',
     description='OCR inference package based on PyTorch',
     author='Your Name',
     author_email='your.email@example.com',
